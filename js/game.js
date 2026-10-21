@@ -8,19 +8,19 @@ document.getElementById('guessBtn').addEventListener('click', () => {
     document.getElementById('attempts').innerText = attempts;
 
     if (isNaN(userGuess) || userGuess < 1 || userGuess > 100) {
-        messageEl.innerText = "请输入 1 到 100 之间的有效数字！";
+        messageEl.innerText = "Please enter a valid number between 1 and 100!";
         messageEl.style.color = "orange";
         return;
     }
 
     if (userGuess === randomNumber) {
-        messageEl.innerText = `恭喜你！猜对了！数字就是 ${randomNumber}。你一共猜了 ${attempts} 次。`;
+        messageEl.innerText = `Congratulations! You guessed it! The number was ${randomNumber}. You took ${attempts} attempts.`;
         messageEl.style.color = "green";
     } else if (userGuess > randomNumber) {
-        messageEl.innerText = "太大了！再试试。";
+        messageEl.innerText = "Too high! Try again.";
         messageEl.style.color = "red";
     } else {
-        messageEl.innerText = "太小了！再试试。";
+        messageEl.innerText = "Too low! Try again.";
         messageEl.style.color = "red";
     }
 });
