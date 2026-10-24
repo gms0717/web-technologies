@@ -101,10 +101,17 @@ window.JD = window.JD || {};
     },
     /** 用商品 + 规格 + 数量生成一条“待付款”订单 */
     create(items) {
-      const snapshot = items.map(({ productId, spec = '', qty = 1 }) => {
+      const snapshot = items.map(({ productId, spec = '', qty = 1, price }) => {
         const product = JD.getProduct(productId);
         if (!product) return null;
-        return { productId, name: product.name, img: product.img, spec, price: product.price, qty };
+        return {
+          productId,
+          name: product.name,
+          img: product.img,
+          spec,
+          price: price == null ? product.price : price,
+          qty,
+        };
       }).filter(Boolean);
 
       if (!snapshot.length) return null;
@@ -350,10 +357,23 @@ window.JD = window.JD || {};
     return modalEl;
   }
 
+  /** 当前选择规格对应的单价（基础价 + 各选项加价） */
+  function unitPrice() {
+    const { product, spec } = detailState;
+    const extra = product.specExtra || {};
+    const delta = Object.values(spec).reduce((sum, value) => sum + (extra[value] || 0), 0);
+    return round2(product.price + delta);
+  }
+
   function detailHtml() {
-    const { product, spec, qty } = detailState;
+    const { product, qty } = detailState;
+    const spec = detailState.spec;
     const faved = fav.has(product.id);
     const specKeys = Object.keys(product.specs || {});
+    const price = unitPrice();
+    const lowStock = product.stock <= 10;
+    const filled = Math.round(product.rating);
+    const reviews = (JD.reviews[product.cat] || []).slice(0, 2);
 
     return `
       <div class="detail-media">
@@ -364,10 +384,22 @@ window.JD = window.JD || {};
         <h2 class="detail-title" id="detailTitle">${esc(product.name)}</h2>
         <p class="detail-desc">${esc(product.desc)}</p>
         <p class="detail-price">
-          <span class="price"><span class="yen">¥</span>${money(product.price)}</span>
+          <span class="price"><span class="yen">¥</span>${money(price)}</span>
           <del class="origin">¥${money(product.origin)}</del>
           <span class="detail-sales">${esc(product.sales)} 人付款</span>
         </p>
+
+        <div class="detail-rating">
+          <span class="review-stars" aria-label="评分 ${product.rating}">
+            ${'★'.repeat(filled)}${'☆'.repeat(5 - filled)}
+          </span>
+          <b>${product.rating}</b>
+          <span>好评率 ${Math.round(product.rating * 20)}%</span>
+          <span class="detail-stock${lowStock ? ' is-low' : ''}">
+            ${lowStock ? `仅剩 ${product.stock} 件` : `库存 ${product.stock} 件`}
+          </span>
+        </div>
+
         <p class="detail-promo">限时直降 · 满 3000 减 300 · 支持 12 期免息</p>
 
         ${specKeys.map((key) => `
@@ -387,6 +419,7 @@ window.JD = window.JD || {};
             <input id="detailQty" value="${qty}" readonly aria-label="购买数量">
             <button type="button" data-step="1" aria-label="增加">+</button>
           </div>
+          <span class="detail-limit">每单限购 ${product.stock} 件</span>
         </div>
 
         <p class="detail-service">7 天无理由退货 · 全国联保 · 顺丰包邮</p>
@@ -396,6 +429,18 @@ window.JD = window.JD || {};
           <button type="button" class="btn btn-primary" data-buy>立即购买</button>
         </div>
       </div>
+
+      <section class="detail-reviews">
+        <h3>用户评价 <span>共 ${esc(product.sales)} 条</span></h3>
+        ${reviews.map((review) => `
+          <div class="review">
+            <div class="review-head">
+              <span>${esc(review.user)}</span>
+              <span class="review-stars" aria-label="${review.stars} 星">${'★'.repeat(review.stars)}${'☆'.repeat(5 - review.stars)}</span>
+            </div>
+            <p>${esc(review.text)}</p>
+          </div>`).join('')}
+      </section>
     `;
   }
 
@@ -412,7 +457,8 @@ window.JD = window.JD || {};
 
     body.querySelectorAll('[data-step]').forEach((btn) => {
       btn.addEventListener('click', () => {
-        detailState.qty = Math.min(99, Math.max(1, detailState.qty + Number(btn.dataset.step)));
+        const max = Math.min(99, detailState.product.stock);
+        detailState.qty = Math.min(max, Math.max(1, detailState.qty + Number(btn.dataset.step)));
         paintDetail();
       });
     });
@@ -426,7 +472,7 @@ window.JD = window.JD || {};
     body.querySelector('[data-buy]').addEventListener('click', () => {
       const { product, spec, qty } = detailState;
       const specText = Object.values(spec).filter(Boolean).join(' / ');
-      const order = orders.create([{ productId: product.id, spec: specText, qty }]);
+      const order = orders.create([{ productId: product.id, spec: specText, qty, price: unitPrice() }]);
       if (!order) return;
       closeDetail();
       toast('下单成功，正在跳转订单页…');

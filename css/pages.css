@@ -175,6 +175,20 @@
 .detail-price { display: flex; align-items: baseline; gap: 8px; margin-top: 14px; }
 .detail-price .price { font-size: 28px; }
 .detail-sales { margin-left: auto; color: var(--text-3); font-size: 12px; }
+
+.detail-rating {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  color: var(--text-2);
+  font-size: 13px;
+}
+.detail-rating b { color: var(--text-1); font-size: 15px; }
+.review-stars { color: #ff9f1c; letter-spacing: 1px; }
+.detail-stock { margin-left: auto; color: var(--text-3); font-size: 12px; }
+.detail-stock.is-low { color: var(--brand); }
+.detail-limit { color: var(--text-3); font-size: 12px; }
 .detail-promo {
   margin-top: 12px;
   padding: 8px 12px;
@@ -218,6 +232,19 @@
 .detail-actions { display: flex; gap: 12px; margin-top: 22px; }
 .detail-actions .btn { height: 44px; border-radius: 22px; font-size: 14px; }
 .detail-actions [data-buy] { flex: 1; }
+
+.detail-reviews {
+  grid-column: 1 / -1;
+  margin-top: 4px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.detail-reviews h3 { display: flex; align-items: baseline; gap: 8px; font-size: 14px; font-weight: 600; }
+.detail-reviews h3 span { color: var(--text-3); font-size: 12px; font-weight: 400; }
+.review { padding: 10px 0; border-bottom: 1px dashed #f1f2f4; }
+.review:last-child { padding-bottom: 0; border-bottom: 0; }
+.review-head { display: flex; align-items: center; gap: 8px; color: var(--text-3); font-size: 12px; }
+.review p { margin-top: 4px; color: var(--text-2); font-size: 13px; line-height: 1.6; }
 
 /* ---------------- 订单页 ---------------- */
 .tabs-bar {

@@ -120,6 +120,81 @@ JD.products.forEach((product) => {
 });
 
 JD.getProduct = (id) => JD.products.find((p) => p.id === id);
+
+/**
+ * 评分 / 库存 / 规格加价
+ * 单独集中配置，商品主体数据保持简洁；specExtra 的键是规格选项文案，
+ * 选中该选项时在基础价上加减对应金额。
+ */
+const productExtras = {
+  p1: { rating: 4.9, stock: 12, specExtra: { '512GB': 800 } },
+  p2: { rating: 4.8, stock: 26, specExtra: { '512GB': 600 } },
+  p3: { rating: 4.9, stock: 8, specExtra: { '16G+512G': -1500 } },
+  p4: { rating: 4.7, stock: 31, specExtra: { '32G+1T': 1000 } },
+  p5: { rating: 4.8, stock: 18, specExtra: { '1.5 匹': 200 } },
+  p6: { rating: 4.7, stock: 9, specExtra: { '12 公斤': 300 } },
+  p7: { rating: 4.6, stock: 22, specExtra: { '1.5 匹': 250 } },
+  p8: { rating: 4.9, stock: 6, specExtra: { '尊享版': 400 } },
+  p9: { rating: 4.8, stock: 15, specExtra: { '全能套装': 600 } },
+  p10: { rating: 4.8, stock: 40 },
+  p11: { rating: 4.7, stock: 33, specExtra: { '5L': 120 } },
+  p12: { rating: 4.6, stock: 50 },
+  p13: { rating: 4.7, stock: 45 },
+  p14: { rating: 4.8, stock: 20, specExtra: { 'XL': 50 } },
+  p15: { rating: 4.9, stock: 60, specExtra: { '12 瓶装': -18 } },
+  p16: { rating: 4.8, stock: 28, specExtra: { '1.5kg 60 袋': 110 } },
+  p17: { rating: 4.7, stock: 17, specExtra: { '精装': 40 } },
+  p18: { rating: 4.8, stock: 36, specExtra: { '120g×2': 60 } },
+};
+
+Object.entries(productExtras).forEach(([id, extra]) => {
+  const product = JD.getProduct(id);
+  if (product) Object.assign(product, extra, { specExtra: extra.specExtra || {} });
+});
+
+/** 评价摘要：按品类给几条通用评价，详情页展示 */
+JD.reviews = {
+  phone: [
+    { user: '林**', stars: 5, text: '做工扎实，续航能撑一整天，包装完好。' },
+    { user: '陈**', stars: 5, text: '操作顺手，连接稳定，物流也快。' },
+    { user: '周**', stars: 4, text: '整体满意，就是包装盒有点大。' },
+  ],
+  computer: [
+    { user: '吴**', stars: 5, text: '很轻，键盘手感不错，办公完全够用。' },
+    { user: '郑**', stars: 4, text: '开机很快，风扇偶尔有点声音。' },
+    { user: '孙**', stars: 5, text: '屏幕色彩好，接口够用，值得买。' },
+  ],
+  appliance: [
+    { user: '李**', stars: 5, text: '安装师傅上门很快，运行声音小。' },
+    { user: '王**', stars: 4, text: '制冷速度快，就是外机有点大。' },
+    { user: '赵**', stars: 5, text: '用了一周很稳定，家里人都满意。' },
+  ],
+  fashion: [
+    { user: '钱**', stars: 5, text: '版型好看，做工细致，尺码正常。' },
+    { user: '冯**', stars: 4, text: '颜色比图片略深，保暖性不错。' },
+    { user: '褚**', stars: 5, text: '很轻便，通勤穿正合适。' },
+  ],
+  beauty: [
+    { user: '卫**', stars: 5, text: '泡沫细腻，洗完不紧绷。' },
+    { user: '蒋**', stars: 4, text: '味道清淡，敏感肌用着没问题。' },
+    { user: '沈**', stars: 5, text: '一直在用，性价比可以。' },
+  ],
+  food: [
+    { user: '韩**', stars: 5, text: '包装严实，日期很新鲜。' },
+    { user: '杨**', stars: 5, text: '分量足，独立包装很方便。' },
+    { user: '朱**', stars: 4, text: '口感不错，就是甜度稍高。' },
+  ],
+  book: [
+    { user: '秦**', stars: 5, text: '印刷清晰，纸张厚实，值得收藏。' },
+    { user: '尤**', stars: 5, text: '包装完好，没有磕碰。' },
+    { user: '许**', stars: 4, text: '内容不错，运输稍慢。' },
+  ],
+  sport: [
+    { user: '何**', stars: 5, text: '脚感软，跑步不累，尺码标准。' },
+    { user: '吕**', stars: 4, text: '鞋面透气，雨天不太合适。' },
+    { user: '施**', stars: 5, text: '日常穿也好看，会回购。' },
+  ],
+};
 JD.categoryName = (id) => (JD.categories.find((c) => c.id === id) || {}).name || '全部商品';
 
 /** 首页轮播：纯 CSS 渐变绘制，不依赖图片 */

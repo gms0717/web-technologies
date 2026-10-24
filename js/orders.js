@@ -145,7 +145,9 @@
           }
           break;
         case 'rebuy':
-          JD.orders.create(order.items.map((it) => ({ productId: it.productId, spec: it.spec, qty: it.qty })));
+          JD.orders.create(order.items.map((it) => ({
+            productId: it.productId, spec: it.spec, qty: it.qty, price: it.price,
+          })));
           JD.toast('已重新下单，请在「待付款」中查看');
           break;
         default:
