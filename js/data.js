@@ -1,0 +1,184 @@
+/* =========================================================
+   data.js — 全站演示数据（纯前端，无后端）
+   ========================================================= */
+window.JD = window.JD || {};
+
+JD.brand = { name: '优选商城', slogan: '好物精选 · 品质生活' };
+
+/** 分类：首页快捷入口与商品筛选共用 */
+JD.categories = [
+  { id: 'phone',     name: '手机数码', icon: '📱' },
+  { id: 'computer',  name: '电脑办公', icon: '💻' },
+  { id: 'appliance', name: '家用电器', icon: '🧊' },
+  { id: 'fashion',   name: '服饰鞋包', icon: '🧥' },
+  { id: 'beauty',    name: '美妆个护', icon: '🧴' },
+  { id: 'food',      name: '食品生鲜', icon: '🍎' },
+  { id: 'book',      name: '图书文娱', icon: '📚' },
+  { id: 'sport',     name: '运动户外', icon: '👟' },
+];
+
+/**
+ * 商品库
+ * price 售价 / origin 划线价 / sales 销量文案 / tag 角标 / specs 可选规格
+ */
+JD.products = [
+  {
+    id: 'p1', name: '旗舰 5G 手机 12GB+256GB', desc: '2K 护眼屏 · 5000mAh 长续航 · 蔡司影像',
+    price: 8999, origin: 9499, sales: '2.3万+', tag: '自营', cat: 'phone',
+    specs: { 颜色: ['钛金属灰', '深空黑'], 容量: ['256GB', '512GB'] },
+  },
+  {
+    id: 'p2', name: '轻旗舰 5G 手机 16GB+512GB', desc: '轻薄机身 · 120W 快充 · 一亿像素主摄',
+    price: 6499, origin: 6999, sales: '1.8万+', tag: '', cat: 'phone',
+    specs: { 颜色: ['曜石黑', '月光白'], 容量: ['256GB', '512GB'] },
+  },
+  {
+    id: 'p3', name: '超轻薄笔记本 14.2 英寸 32G+1T', desc: '2.8K 触控屏 · 1.2kg 机身 · 全天续航',
+    price: 9999, origin: 10999, sales: '3200+', tag: '新品', cat: 'computer',
+    specs: { 颜色: ['深空灰', '月光银'], 配置: ['32G+1T', '16G+512G'] },
+  },
+  {
+    id: 'p4', name: '高性能轻薄本 16 英寸 16G+1T', desc: '标压处理器 · 2.5K 高刷屏 · 全金属机身',
+    price: 5499, origin: 5999, sales: '8600+', tag: '', cat: 'computer',
+    specs: { 颜色: ['星空灰'], 配置: ['16G+1T', '32G+1T'] },
+  },
+  {
+    id: 'p5', name: '变频冷暖空调 1.5 匹 新一级能效', desc: '静音运行 · 自清洁 · 快速冷暖',
+    price: 2799, origin: 3199, sales: '1.2万+', tag: '满减', cat: 'appliance',
+    specs: { 匹数: ['1 匹', '1.5 匹'], 颜色: ['白色'] },
+  },
+  {
+    id: 'p6', name: '滚筒洗衣机 10 公斤 直驱变频', desc: '除菌螨洗 · 智能投放 · 低噪运行',
+    price: 2599, origin: 2999, sales: '7800+', tag: '', cat: 'appliance',
+    specs: { 容量: ['10 公斤', '12 公斤'], 颜色: ['白色'] },
+  },
+  {
+    id: 'p7', name: '壁挂式空调 大 1 匹 静音自清洁', desc: '一级能效 · 无风感 · 智能控制',
+    price: 3199, origin: 3599, sales: '5400+', tag: '', cat: 'appliance',
+    specs: { 匹数: ['大 1 匹', '1.5 匹'], 颜色: ['白色'] },
+  },
+  {
+    id: 'p8', name: '头戴式无线降噪耳机', desc: '40 小时续航 · 自适应降噪 · 空间音频',
+    price: 2299, origin: 2899, sales: '1.5万+', tag: '爆款', cat: 'phone',
+    specs: { 颜色: ['曜石黑', '雾灰'], 版本: ['标准版', '尊享版'] },
+  },
+  {
+    id: 'p9', name: '无线手持吸尘器 轻量版', desc: '150AW 吸力 · 60 分钟续航 · 多刷头',
+    price: 3490, origin: 3990, sales: '4100+', tag: '', cat: 'appliance',
+    specs: { 颜色: ['曜石黑'], 套装: ['标准套装', '全能套装'] },
+  },
+  {
+    id: 'p10', name: '无线静音鼠标 人体工学', desc: '静音微动 · 8000DPI · 三模连接',
+    price: 699, origin: 799, sales: '2.1万+', tag: '', cat: 'computer',
+    specs: { 颜色: ['石墨黑', '象牙白'] },
+  },
+  {
+    id: 'p11', name: 'IH 电饭煲 4L 家用多功能', desc: 'IH 电磁加热 · 24 小时预约 · 不粘内胆',
+    price: 899, origin: 1099, sales: '6300+', tag: '', cat: 'appliance',
+    specs: { 容量: ['3L', '4L', '5L'] },
+  },
+  {
+    id: 'p12', name: '破壁料理机 1.75L 家用', desc: '八叶刀头 · 冷热双打 · 一键清洗',
+    price: 399, origin: 599, sales: '9800+', tag: '直降', cat: 'appliance',
+    specs: { 颜色: ['白色', '粉色'] },
+  },
+  {
+    id: 'p13', name: '缓震跑步鞋 轻质回弹', desc: '全掌缓震 · 透气网面 · 日常通勤',
+    price: 359, origin: 499, sales: '3.2万+', tag: '', cat: 'sport',
+    specs: { 尺码: ['40', '41', '42', '43'] },
+  },
+  {
+    id: 'p14', name: '轻型羽绒外套 90% 白鸭绒', desc: '轻至 320g · 防泼水面料 · 可收纳',
+    price: 599, origin: 799, sales: '1.4万+', tag: '', cat: 'fashion',
+    specs: { 颜色: ['黑色', '米白'], 尺码: ['M', 'L', 'XL'] },
+  },
+  {
+    id: 'p15', name: '天然饮用水 550ml×24 瓶', desc: '整箱家庭装 · 弱碱性 · 直接饮用',
+    price: 39.9, origin: 48, sales: '12万+', tag: '', cat: 'food',
+    specs: { 规格: ['24 瓶整箱', '12 瓶装'] },
+  },
+  {
+    id: 'p16', name: '每日坚果 750g 30 袋', desc: '混合果仁 · 独立小包 · 随身携带',
+    price: 129, origin: 158, sales: '8.6万+', tag: '热卖', cat: 'food',
+    specs: { 规格: ['750g 30 袋', '1.5kg 60 袋'] },
+  },
+  {
+    id: 'p17', name: '精装畅销小说套装 全 5 册', desc: '经典文学 · 精装典藏 · 附赠书签',
+    price: 118, origin: 168, sales: '9600+', tag: '', cat: 'book',
+    specs: { 版本: ['平装', '精装'] },
+  },
+  {
+    id: 'p18', name: '氨基酸洁面乳 120g', desc: '温和清洁 · 不紧绷 · 敏感肌可用',
+    price: 89, origin: 129, sales: '4.2万+', tag: '', cat: 'beauty',
+    specs: { 规格: ['120g', '120g×2'] },
+  },
+];
+
+/** 商品图统一按 id 映射到本地 SVG，避免逐条重复写路径 */
+JD.products.forEach((product) => {
+  product.img = `images/products/${product.id}.svg`;
+});
+
+JD.getProduct = (id) => JD.products.find((p) => p.id === id);
+JD.categoryName = (id) => (JD.categories.find((c) => c.id === id) || {}).name || '全部商品';
+
+/** 首页轮播：纯 CSS 渐变绘制，不依赖图片 */
+JD.banners = [
+  {
+    tag: '限时特惠',
+    title: '精选好物 低至 5 折',
+    sub: '每日 10 点上新 · 数量有限 先到先得',
+    cta: '立即选购',
+    theme: 'linear-gradient(120deg, #ff9a6c 0%, #e8453c 55%, #b3251f 100%)',
+  },
+  {
+    tag: '新品上市',
+    title: '轻薄本 · 旗舰手机',
+    sub: '新一代性能升级 · 支持 12 期免息',
+    cta: '查看新品',
+    theme: 'linear-gradient(120deg, #24304a 0%, #3f5a85 55%, #6b8cba 100%)',
+  },
+  {
+    tag: '家电焕新',
+    title: '以旧换新 至高补贴 800 元',
+    sub: '空调 / 冰箱 / 洗衣机 全场参与',
+    cta: '去看看',
+    theme: 'linear-gradient(120deg, #0f766e 0%, #0e9488 50%, #38bdf8 100%)',
+  },
+];
+
+/** 消息中心 */
+JD.messageCats = [
+  { id: 'all', name: '全部消息' },
+  { id: 'logistics', name: '订单物流' },
+  { id: 'promo', name: '优惠活动' },
+  { id: 'system', name: '系统公告' },
+];
+
+JD.seedMessages = () => [
+  { id: 'm1', cat: 'logistics', title: '订单已发货', text: '你的订单已从仓库发出，预计明日送达，请注意查收。', time: '10-24 14:20', read: false },
+  { id: 'm2', cat: 'promo', title: '限时特惠开始啦', text: '精选好物 5 折起，数量有限，先到先得。', time: '10-24 10:00', read: false },
+  { id: 'm3', cat: 'system', title: '账号安全提醒', text: '你的账号在新设备登录，如非本人操作请及时修改密码。', time: '10-23 21:12', read: false },
+  { id: 'm4', cat: 'logistics', title: '包裹已签收', text: '订单已签收，感谢你的购买，期待你的评价。', time: '10-23 16:40', read: true },
+  { id: 'm5', cat: 'promo', title: '新人礼包已到账', text: '3 张满减券已放入你的账户，有效期 7 天。', time: '10-22 09:30', read: true },
+  { id: 'm6', cat: 'system', title: '服务升级公告', text: '本站将于周日凌晨进行系统维护，期间部分功能可能短暂不可用。', time: '10-21 18:00', read: true },
+];
+
+/** 演示订单（首次打开时写入本地，方便直接看效果） */
+JD.seedOrders = () => [
+  {
+    id: 'o1', no: 'YX20261024153012', time: '2026-10-24 15:30', status: 'unpaid',
+    items: [{ productId: 'p5', spec: '1.5 匹 / 白色', qty: 1 }],
+  },
+  {
+    id: 'o2', no: 'YX20261023201008', time: '2026-10-23 20:10', status: 'shipped',
+    items: [{ productId: 'p1', spec: '钛金属灰 / 256GB', qty: 1 }],
+  },
+  {
+    id: 'o3', no: 'YX20261020090531', time: '2026-10-20 09:05', status: 'done',
+    items: [
+      { productId: 'p16', spec: '750g 30 袋', qty: 2 },
+      { productId: 'p15', spec: '24 瓶整箱', qty: 1 },
+    ],
+  },
+];

@@ -1,0 +1,4 @@
+# 本地预览 / 自检产生的临时文件，不纳入版本管理
+.preview/
+node_modules/
+*.log

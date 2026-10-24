@@ -1,20 +1,52 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>My Learning Homepage</title>
-    <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>首页 - 优选商城</title>
+  <meta name="description" content="优选商城 —— 纯 HTML + CSS + JavaScript 实现的前端练习作品，包含首页、订单、消息、我的四个页面。">
+  <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/pages.css">
 </head>
 <body>
-    <header id="navbar"></header>
-    
-    <!-- Hero Image & Overview -->
-    <section class="hero">
-        <h1>Welcome to My HTML Learning Journey</h1>
-        <p>This is a website to showcase my learning progress, quote collection, and an interactive game.</p>
-        <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80" alt="Coding Hero" style="width:100%; max-height:400px; object-fit:cover;">
+  <!-- 头部由 js/common.js 统一渲染 -->
+  <header id="app-header"></header>
+
+  <main>
+    <!-- 轮播 -->
+    <section class="home-hero">
+      <div class="container">
+        <div class="carousel" id="carousel" aria-roledescription="carousel" aria-label="促销海报">
+          <div class="carousel-track" id="carouselTrack"></div>
+          <div class="carousel-dots" id="carouselDots"></div>
+        </div>
+      </div>
     </section>
 
-    <script src="js/nav.js"></script>
+    <div class="container">
+      <!-- 分类快捷入口 -->
+      <nav class="cat-row" id="catRow" aria-label="商品分类"></nav>
+
+      <!-- 商品列表 -->
+      <section class="panel" id="goods">
+        <div class="section-head">
+          <h2 class="section-title">猜你喜欢</h2>
+          <span class="section-sub" id="goodsHint">全部商品</span>
+          <button type="button" class="section-more" id="clearFilter" hidden>清除筛选</button>
+        </div>
+        <div class="goods-grid" id="goodsGrid"></div>
+        <div class="load-more" id="loadMoreBox" hidden>
+          <button class="btn btn-ghost" id="loadMore" type="button">查看更多商品</button>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer id="app-footer"></footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/home.js"></script>
 </body>
 </html>

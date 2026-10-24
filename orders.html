@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>我的订单 - 优选商城</title>
+  <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+  <header id="app-header"></header>
+
+  <main class="container page">
+    <div class="page-head">
+      <h1>我的订单</h1>
+      <p id="orderSummary">共 0 笔订单</p>
+    </div>
+
+    <section class="panel">
+      <div class="tabs-bar" id="orderTabs"></div>
+      <div class="order-list" id="orderList"></div>
+      <div class="empty" id="orderEmpty" hidden></div>
+    </section>
+  </main>
+
+  <footer id="app-footer"></footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/orders.js"></script>
+</body>
+</html>
