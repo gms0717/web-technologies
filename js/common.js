@@ -14,6 +14,7 @@ window.JD = window.JD || {};
     messages: 'yx_messages',
     fav: 'yx_fav',
     seeded: 'yx_seeded',
+    history: 'yx_search_history',
   };
 
   /* ---------------- 本地存储 ---------------- */
@@ -239,6 +240,31 @@ window.JD = window.JD || {};
     toastTimer = setTimeout(() => el.classList.remove('is-show'), 2200);
   }
 
+  /* ---------------- 搜索历史 ---------------- */
+  const HISTORY_MAX = 8;
+
+  const searchHistory = {
+    all() {
+      const list = store.get(KEYS.history, []);
+      return Array.isArray(list) ? list.slice(0, HISTORY_MAX) : [];
+    },
+    push(keyword) {
+      const word = String(keyword || '').trim();
+      if (!word) return searchHistory.all();
+      const list = searchHistory.all().filter((item) => item !== word);
+      list.unshift(word);
+      const next = list.slice(0, HISTORY_MAX);
+      store.set(KEYS.history, next);
+      return next;
+    },
+    remove(keyword) {
+      store.set(KEYS.history, searchHistory.all().filter((item) => item !== keyword));
+    },
+    clear() {
+      store.set(KEYS.history, []);
+    },
+  };
+
   /* ---------------- 头部 / 页脚 ---------------- */
   function renderHeader() {
     const host = document.getElementById('app-header');
@@ -272,10 +298,14 @@ window.JD = window.JD || {};
             }</a>`).join('')}
         </nav>
 
-        <form class="search" id="searchForm" role="search">
-          <input id="searchInput" type="search" placeholder="搜索商品，如：耳机" aria-label="搜索商品" autocomplete="off">
-          <button type="submit">搜索</button>
-        </form>
+        <div class="search-wrap" id="searchWrap">
+          <form class="search" id="searchForm" role="search">
+            <input id="searchInput" type="search" placeholder="搜索商品，如：耳机" aria-label="搜索商品"
+                   autocomplete="off" role="combobox" aria-expanded="false" aria-controls="searchPanel">
+            <button type="submit">搜索</button>
+          </form>
+          <div class="search-panel" id="searchPanel" hidden></div>
+        </div>
 
         <a class="user-entry" href="profile.html">
           <span class="avatar">${esc(me.name.slice(0, 1))}</span>
@@ -284,15 +314,202 @@ window.JD = window.JD || {};
       </div>
     `;
 
+    bindSearch(host);
+  }
+
+  /**
+   * 搜索框：输入联想 + 搜索历史 + 热门搜索
+   * 支持鼠标点击、键盘上下选择、回车确认、Esc 关闭
+   */
+  function bindSearch(host) {
+    const wrap = host.querySelector('#searchWrap');
     const form = host.querySelector('#searchForm');
-    form.addEventListener('submit', (event) => {
-      const keyword = form.querySelector('#searchInput').value.trim();
-      event.preventDefault();
-      if (typeof JD.onSearch === 'function') {
-        JD.onSearch(keyword);
-      } else {
-        location.href = keyword ? `index.html?q=${encodeURIComponent(keyword)}` : 'index.html';
+    const input = host.querySelector('#searchInput');
+    const panel = host.querySelector('#searchPanel');
+    if (!wrap || !form || !input || !panel) return;
+
+    const HOT_WORDS = ['耳机', '空调', '笔记本', '手机', '坚果', '跑步鞋'];
+    let options = [];
+    let active = -1;
+
+    const open = () => {
+      panel.hidden = false;
+      input.setAttribute('aria-expanded', 'true');
+    };
+    const close = () => {
+      panel.hidden = true;
+      input.setAttribute('aria-expanded', 'false');
+      active = -1;
+    };
+
+    /** 把命中的关键词用 <mark> 包起来（先转义再拼接） */
+    const highlight = (text, keyword) => {
+      const safe = esc(text);
+      const word = esc(keyword.trim());
+      if (!word) return safe;
+      const index = safe.toLowerCase().indexOf(word.toLowerCase());
+      if (index < 0) return safe;
+      return `${safe.slice(0, index)}<mark>${safe.slice(index, index + word.length)}</mark>${safe.slice(index + word.length)}`;
+    };
+
+    function paintSuggest(keyword) {
+      const word = keyword.trim().toLowerCase();
+      const cats = JD.categories
+        .filter((cat) => cat.name.toLowerCase().includes(word))
+        .slice(0, 2)
+        .map((cat) => ({ type: 'cat', id: cat.id, label: cat.name, icon: '🏷' }));
+      const goods = JD.products
+        .filter((product) => product.name.toLowerCase().includes(word))
+        .slice(0, 6)
+        .map((product) => ({ type: 'product', id: product.id, label: product.name, icon: '📦' }));
+
+      options = [...cats, ...goods];
+      active = -1;
+
+      if (!options.length) {
+        panel.innerHTML = `<p class="sp-empty">没有匹配的商品，按回车直接搜索「${esc(keyword.trim())}」</p>`;
+        return;
       }
+
+      panel.innerHTML = `<ul class="sp-list">${options.map((item, index) => `
+        <li>
+          <button type="button" class="sp-item" data-index="${index}">
+            <span class="sp-icon" aria-hidden="true">${item.icon}</span>
+            <span class="sp-label">${highlight(item.label, keyword)}</span>
+            <span class="sp-type">${item.type === 'cat' ? '分类' : '商品'}</span>
+          </button>
+        </li>`).join('')}</ul>`;
+    }
+
+    function paintHistory() {
+      const history = searchHistory.all();
+      options = [];
+      active = -1;
+
+      panel.innerHTML = `
+        ${history.length ? `
+          <div class="sp-head">
+            <span>搜索历史</span>
+            <button type="button" data-clear-history>清空</button>
+          </div>
+          <ul class="sp-list">
+            ${history.map((word) => `
+              <li class="sp-row">
+                <button type="button" class="sp-item" data-keyword="${esc(word)}">
+                  <span class="sp-icon" aria-hidden="true">🕘</span>
+                  <span class="sp-label">${esc(word)}</span>
+                </button>
+                <button type="button" class="sp-del" data-remove="${esc(word)}" aria-label="删除「${esc(word)}」">×</button>
+              </li>`).join('')}
+          </ul>` : ''}
+        <div class="sp-head"><span>热门搜索</span></div>
+        <div class="sp-hot">
+          ${HOT_WORDS.map((word) => `<button type="button" class="sp-tag" data-keyword="${word}">${word}</button>`).join('')}
+        </div>
+      `;
+    }
+
+    function runSearch(keyword) {
+      const word = String(keyword || '').trim();
+      if (!word) return;
+      input.value = word;
+      searchHistory.push(word);
+      close();
+      if (typeof JD.onSearch === 'function') JD.onSearch(word);
+      else location.href = `index.html?q=${encodeURIComponent(word)}`;
+    }
+
+    function goCategory(id) {
+      close();
+      if (typeof JD.onCategory === 'function') JD.onCategory(id);
+      else location.href = `index.html?cat=${encodeURIComponent(id)}`;
+    }
+
+    input.addEventListener('focus', () => {
+      if (input.value.trim()) paintSuggest(input.value);
+      else paintHistory();
+      open();
+    });
+
+    input.addEventListener('input', () => {
+      if (input.value.trim()) paintSuggest(input.value);
+      else paintHistory();
+      open();
+    });
+
+    input.addEventListener('keydown', (event) => {
+      if (panel.hidden) return;
+
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        const buttons = [...panel.querySelectorAll('.sp-item')];
+        if (!buttons.length) return;
+        event.preventDefault();
+        active = (active + (event.key === 'ArrowDown' ? 1 : -1) + buttons.length) % buttons.length;
+        buttons.forEach((btn, index) => btn.classList.toggle('is-active', index === active));
+        buttons[active].scrollIntoView({ block: 'nearest' });
+        return;
+      }
+
+      if (event.key === 'Escape') {
+        close();
+        return;
+      }
+
+      if (event.key === 'Enter' && active >= 0) {
+        const button = panel.querySelectorAll('.sp-item')[active];
+        if (button) {
+          event.preventDefault();
+          button.click();
+        }
+      }
+    });
+
+    panel.addEventListener('click', (event) => {
+      if (event.target.closest('[data-clear-history]')) {
+        searchHistory.clear();
+        paintHistory();
+        return;
+      }
+
+      const removeBtn = event.target.closest('[data-remove]');
+      if (removeBtn) {
+        searchHistory.remove(removeBtn.dataset.remove);
+        paintHistory();
+        return;
+      }
+
+      const keywordBtn = event.target.closest('[data-keyword]');
+      if (keywordBtn) {
+        runSearch(keywordBtn.dataset.keyword);
+        return;
+      }
+
+      const item = event.target.closest('[data-index]');
+      if (item) {
+        const picked = options[Number(item.dataset.index)];
+        if (!picked) return;
+        if (picked.type === 'product') {
+          close();
+          JD.openDetail(picked.id);
+        } else {
+          goCategory(picked.id);
+        }
+      }
+    });
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const keyword = input.value.trim();
+      if (!keyword) {
+        paintHistory();
+        open();
+        return;
+      }
+      runSearch(keyword);
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!wrap.contains(event.target)) close();
     });
   }
 
@@ -522,7 +739,7 @@ window.JD = window.JD || {};
 
   Object.assign(JD, {
     store, money, esc, stamp,
-    user, orders, messages, fav,
+    user, orders, messages, fav, searchHistory,
     toast, openDetail, closeDetail,
     updateBadges, STATUS_TEXT,
   });

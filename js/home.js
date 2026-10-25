@@ -118,7 +118,8 @@
       ? shown.map(card).join('')
       : `<div class="empty" style="grid-column:1/-1">
            <div class="empty-icon">🔍</div>
-           <p>没有找到相关商品，换个关键词试试</p>
+           <p>${keyword ? `没有找到与「${esc(keyword)}」相关的商品` : '该分类下暂时没有商品'}</p>
+           <button type="button" class="btn btn-primary" data-reset>查看全部商品</button>
          </div>`;
 
     if (moreBox && moreBtn) {
@@ -147,6 +148,10 @@
     if (!grid) return;
 
     grid.addEventListener('click', (event) => {
+      if (event.target.closest('[data-reset]')) {
+        resetFilters();
+        return;
+      }
       const hit = event.target.closest('[data-product]');
       if (hit) JD.openDetail(hit.dataset.product);
     });
@@ -160,13 +165,29 @@
     });
   }
 
+  function resetFilters() {
+    activeCat = 'all';
+    keyword = '';
+    visible = 8;
+    const input = document.getElementById('searchInput');
+    if (input) input.value = '';
+    renderCats();
+    renderGoods();
+  }
+
   /* ---------------- 初始化 ---------------- */
   document.addEventListener('DOMContentLoaded', () => {
-    const q = new URLSearchParams(location.search).get('q');
+    const params = new URLSearchParams(location.search);
+    const q = params.get('q');
+    const cat = params.get('cat');
+
     if (q) {
       keyword = q;
       const input = document.getElementById('searchInput');
       if (input) input.value = q;
+    }
+    if (cat && JD.categories.some((item) => item.id === cat)) {
+      activeCat = cat;
     }
 
     initCarousel();
@@ -187,6 +208,19 @@
       keyword = value;
       activeCat = 'all';
       visible = 8;
+      renderCats();
+      renderGoods();
+      const grid = document.getElementById('goodsGrid');
+      if (grid) grid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    };
+
+    // 供搜索联想里的「分类」调用
+    JD.onCategory = (id) => {
+      activeCat = JD.categories.some((item) => item.id === id) ? id : 'all';
+      keyword = '';
+      visible = 8;
+      const input = document.getElementById('searchInput');
+      if (input) input.value = '';
       renderCats();
       renderGoods();
       const grid = document.getElementById('goodsGrid');
