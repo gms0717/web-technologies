@@ -124,6 +124,8 @@ window.JD = window.JD || {};
           pad2(now.getHours()) + pad2(now.getMinutes()) + pad2(now.getSeconds()),
         time: stamp(now),
         status: 'unpaid',
+        payment: '在线支付',
+        address: JD.defaultAddress,
         items: snapshot,
         total: round2(snapshot.reduce((sum, it) => sum + it.price * it.qty, 0)),
       };
@@ -215,6 +217,7 @@ window.JD = window.JD || {};
       const items = snapshot(order.items);
       return {
         ...order,
+        address: JD.defaultAddress,
         items,
         total: round2(items.reduce((sum, it) => sum + it.price * it.qty, 0)),
       };

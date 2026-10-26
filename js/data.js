@@ -239,21 +239,61 @@ JD.seedMessages = () => [
   { id: 'm6', cat: 'system', title: '服务升级公告', text: '本站将于周日凌晨进行系统维护，期间部分功能可能短暂不可用。', time: '10-21 18:00', read: true },
 ];
 
+/** 默认收货地址与支付方式（纯演示数据） */
+JD.addresses = [
+  {
+    id: 'a1',
+    name: '林小优',
+    phone: '138****8888',
+    region: '北京市 朝阳区',
+    detail: '望京街道 望京西园 1 号楼 802 室',
+    isDefault: true,
+  },
+  {
+    id: 'a2',
+    name: '林小优',
+    phone: '138****8888',
+    region: '上海市 浦东新区',
+    detail: '张江镇 科苑路 88 号 B 座 1203',
+    isDefault: false,
+  },
+];
+
+JD.defaultAddress = JD.addresses[0];
+
 /** 演示订单（首次打开时写入本地，方便直接看效果） */
 JD.seedOrders = () => [
   {
     id: 'o1', no: 'YX20261024153012', time: '2026-10-24 15:30', status: 'unpaid',
+    payment: '在线支付',
     items: [{ productId: 'p5', spec: '1.5 匹 / 白色', qty: 1 }],
   },
   {
     id: 'o2', no: 'YX20261023201008', time: '2026-10-23 20:10', status: 'shipped',
+    payment: '在线支付',
     items: [{ productId: 'p1', spec: '钛金属灰 / 256GB', qty: 1 }],
   },
   {
     id: 'o3', no: 'YX20261020090531', time: '2026-10-20 09:05', status: 'done',
+    payment: '分期付款',
     items: [
       { productId: 'p16', spec: '750g 30 袋', qty: 2 },
       { productId: 'p15', spec: '24 瓶整箱', qty: 1 },
     ],
+  },
+  {
+    id: 'o4', no: 'YX20261019112044', time: '2026-10-19 11:20', status: 'cancelled',
+    payment: '在线支付',
+    items: [{ productId: 'p12', spec: '白色', qty: 1 }],
+  },
+  {
+    id: 'o5', no: 'YX20261018164507', time: '2026-10-18 16:45', status: 'paid',
+    payment: '货到付款',
+    items: [{ productId: 'p3', spec: '深空灰 / 32G+1T', qty: 1 }],
+  },
+  {
+    id: 'o6', no: 'YX20261015100022', time: '2026-10-15 10:00', status: 'done',
+    payment: '在线支付',
+    items: [{ productId: 'p14', spec: '黑色 / L', qty: 1 }],
   },
 ];
