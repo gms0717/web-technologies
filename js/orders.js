@@ -1,6 +1,6 @@
 /* =========================================================
    orders.js — 订单页
-   状态页签 / 流程进度 / 订单详情展开 / 分页 / 状态操作
+   状态页签 / 流程进度 / 订单详情 / 分页 / 状态操作 / 评价
    ========================================================= */
 (function () {
   'use strict';
@@ -64,6 +64,17 @@
       </div>`;
   }
 
+  /** 订单进度：按已有时间戳生成事件 */
+  function events(order) {
+    return [
+      { label: '提交订单', time: order.time },
+      { label: '支付成功', time: order.paidAt },
+      { label: '商品发出', time: order.shippedAt },
+      { label: '确认收货', time: order.doneAt },
+      { label: '订单取消', time: order.cancelledAt },
+    ].filter((item) => item.time);
+  }
+
   function detailHtml(order) {
     const address = order.address || JD.defaultAddress;
     const goodsTotal = order.items.reduce((sum, it) => sum + it.price * it.qty, 0);
@@ -83,7 +94,23 @@
             <p>订单编号：${esc(order.no)}</p>
             <p>下单时间：${esc(order.time)}</p>
           </div>
+          <div class="od-col">
+            <h5>订单进度</h5>
+            <ul class="od-timeline">
+              ${events(order).map((evt) => `
+                <li><span>${esc(evt.label)}</span><time>${esc(evt.time)}</time></li>`).join('')}
+            </ul>
+          </div>
         </div>
+
+        ${order.review ? `
+          <div class="od-review">
+            <h5>我的评价</h5>
+            <p><span class="review-stars">${'★'.repeat(order.review.stars)}</span>
+               <span class="od-review-time">${esc(order.review.time)}</span></p>
+            <p>${esc(order.review.text || '此用户没有填写评价内容')}</p>
+          </div>` : ''}
+
         <div class="od-amount">
           <span>商品总额 ¥${money(goodsTotal)}</span>
           <span>运费 ¥0</span>
@@ -112,12 +139,15 @@
           <button class="btn btn-primary btn-sm" data-act="receive" data-id="${id}">确认收货</button>`;
       case 'done':
         return `${detail}
-          <button class="btn btn-ghost btn-sm" data-act="delete" data-id="${id}">删除订单</button>
-          <button class="btn btn-ghost btn-sm" data-act="rebuy" data-id="${id}">再次购买</button>`;
+          ${order.review
+            ? '<button class="btn btn-ghost btn-sm" type="button" disabled>已评价</button>'
+            : `<button class="btn btn-ghost btn-sm" data-act="review" data-id="${id}">评价晒单</button>`}
+          <button class="btn btn-ghost btn-sm" data-act="rebuy" data-id="${id}">再次购买</button>
+          <button class="btn btn-ghost btn-sm" data-act="delete" data-id="${id}">删除订单</button>`;
       case 'cancelled':
         return `${detail}
-          <button class="btn btn-ghost btn-sm" data-act="delete" data-id="${id}">删除订单</button>
-          <button class="btn btn-ghost btn-sm" data-act="rebuy" data-id="${id}">再次购买</button>`;
+          <button class="btn btn-ghost btn-sm" data-act="rebuy" data-id="${id}">再次购买</button>
+          <button class="btn btn-ghost btn-sm" data-act="delete" data-id="${id}">删除订单</button>`;
       default:
         return detail;
     }
@@ -218,12 +248,72 @@
       <a class="btn btn-primary" href="index.html">去逛逛</a>`;
   }
 
+  /* ---------------- 评价弹层 ---------------- */
+  let reviewStars = 5;
+
+  function openReview(order) {
+    reviewStars = 5;
+
+    const el = document.createElement('div');
+    el.className = 'modal';
+    el.innerHTML = `
+      <div class="modal-mask" data-close></div>
+      <div class="review-panel" role="dialog" aria-modal="true" aria-labelledby="reviewTitle">
+        <button class="modal-close" type="button" data-close aria-label="关闭">✕</button>
+        <h3 id="reviewTitle">评价商品</h3>
+        <p class="review-goods">${esc(order.items.map((it) => it.name).join('、'))}</p>
+        <div class="star-input" role="radiogroup" aria-label="评分">
+          ${[1, 2, 3, 4, 5].map((n) => `
+            <button type="button" class="star${n <= reviewStars ? ' is-on' : ''}" data-star="${n}" aria-label="${n} 星">★</button>
+          `).join('')}
+        </div>
+        <textarea id="reviewText" rows="3" maxlength="80" placeholder="说说你的使用感受（选填）"></textarea>
+        <div class="review-actions">
+          <button type="button" class="btn btn-ghost" data-close>取消</button>
+          <button type="button" class="btn btn-primary" data-submit>提交评价</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(el);
+
+    const paint = () => {
+      el.querySelectorAll('.star').forEach((star) => {
+        star.classList.toggle('is-on', Number(star.dataset.star) <= reviewStars);
+      });
+    };
+
+    el.addEventListener('click', (event) => {
+      const star = event.target.closest('[data-star]');
+      if (star) {
+        reviewStars = Number(star.dataset.star);
+        paint();
+        return;
+      }
+
+      if (event.target.closest('[data-submit]')) {
+        JD.orders.update(order.id, {
+          review: {
+            stars: reviewStars,
+            text: el.querySelector('#reviewText').value.trim(),
+            time: JD.stamp(),
+          },
+        });
+        el.remove();
+        JD.toast('评价已提交，感谢反馈');
+        render();
+        return;
+      }
+
+      if (event.target.closest('[data-close]')) el.remove();
+    });
+  }
+
   /* ---------------- 交互 ---------------- */
   function bindActions() {
     const host = document.getElementById('orderList');
     if (!host) return;
 
-    host.addEventListener('click', (event) => {
+    host.addEventListener('click', async (event) => {
       const btn = event.target.closest('[data-act]');
       if (!btn) return;
 
@@ -234,37 +324,85 @@
         case 'detail':
           expandedId = expandedId === order.id ? null : order.id;
           break;
+
         case 'pay':
           JD.orders.update(order.id, { status: 'paid' });
           expandedId = null;
-          JD.toast('支付成功，等待发货');
+          JD.toast('支付成功，可在「待发货」中查看', {
+            actionText: '去看看',
+            onAction: () => {
+              active = 'paid';
+              page = 1;
+              render();
+            },
+          });
           break;
-        case 'cancel':
-          if (!window.confirm('确定取消这笔订单吗？')) return;
+
+        case 'cancel': {
+          const ok = await JD.confirm({
+            title: '取消订单',
+            message: '取消后商品库存会释放，确定取消这笔订单吗？',
+            okText: '确定取消',
+            cancelText: '再想想',
+            danger: true,
+          });
+          if (!ok) return;
           JD.orders.update(order.id, { status: 'cancelled' });
           expandedId = null;
-          JD.toast('订单已取消');
+          JD.toast('订单已取消', {
+            actionText: '撤销',
+            duration: 6000,
+            onAction: () => {
+              JD.orders.update(order.id, { status: 'unpaid', cancelledAt: null });
+              JD.toast('已恢复为待付款');
+              render();
+            },
+          });
           break;
+        }
+
         case 'remind':
           JD.toast('已提醒商家尽快发货');
           break;
-        case 'receive':
+
+        case 'receive': {
+          const ok = await JD.confirm({
+            title: '确认收货',
+            message: '请确认已收到商品，确认后订单将完成。',
+            okText: '确认收货',
+          });
+          if (!ok) return;
           JD.orders.update(order.id, { status: 'done' });
           expandedId = null;
-          JD.toast('已确认收货，感谢购买');
+          JD.toast('已确认收货，记得给个评价');
           break;
-        case 'delete':
-          if (!window.confirm('删除后不可恢复，确定删除吗？')) return;
+        }
+
+        case 'delete': {
+          const ok = await JD.confirm({
+            title: '删除订单',
+            message: '删除后订单记录不可恢复，确定删除吗？',
+            okText: '删除',
+            danger: true,
+          });
+          if (!ok) return;
           JD.orders.remove(order.id);
           expandedId = null;
           JD.toast('订单已删除');
           break;
+        }
+
         case 'rebuy':
           JD.orders.create(order.items.map((it) => ({
             productId: it.productId, spec: it.spec, qty: it.qty, price: it.price,
           })));
           JD.toast('已重新下单，请在「待付款」中查看');
           break;
+
+        case 'review':
+          openReview(order);
+          return;
+
         default:
           return;
       }

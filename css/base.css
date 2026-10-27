@@ -272,6 +272,8 @@ input { font: inherit; color: inherit; }
 }
 .btn-primary { background: var(--brand); color: #fff; }
 .btn-primary:hover { background: var(--brand-dark); color: #fff; }
+.btn-danger { background: #cf352b; color: #fff; }
+.btn-danger:hover { background: #b52c23; color: #fff; }
 .btn-ghost { border: 1px solid var(--line); color: var(--text-2); background: #fff; }
 .btn-ghost:hover { border-color: var(--brand); color: var(--brand); }
 .btn-sm { height: 30px; padding: 0 14px; font-size: 12px; }
@@ -318,6 +320,9 @@ input { font: inherit; color: inherit; }
   left: 50%;
   bottom: 48px;
   z-index: 200;
+  display: flex;
+  align-items: center;
+  gap: 14px;
   transform: translate(-50%, 14px);
   padding: 10px 20px;
   border-radius: 20px;
@@ -328,7 +333,14 @@ input { font: inherit; color: inherit; }
   pointer-events: none;
   transition: opacity 0.22s, transform 0.22s;
 }
-.toast.is-show { opacity: 1; transform: translate(-50%, 0); }
+.toast.is-show { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+.toast-action {
+  flex: none;
+  color: #ffb4ad;
+  font-size: 13px;
+  font-weight: 600;
+}
+.toast-action:hover { color: #fff; }
 
 /* ---------------- 弹层 ---------------- */
 .modal {
@@ -376,6 +388,21 @@ input { font: inherit; color: inherit; }
   text-align: center;
 }
 .modal-close:hover { background: #e6e8ec; color: var(--text-1); }
+
+/* 确认弹窗 */
+.confirm-panel {
+  position: relative;
+  z-index: 1;
+  width: 380px;
+  padding: 24px;
+  border-radius: 16px;
+  background: var(--card);
+  box-shadow: var(--shadow-2);
+  animation: modal-in 0.2s ease-out;
+}
+.confirm-panel h3 { font-size: 17px; font-weight: 700; }
+.confirm-panel p { margin-top: 10px; color: var(--text-2); font-size: 13.5px; line-height: 1.7; }
+.confirm-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
 
 /* ---------------- 页脚 ---------------- */
 .app-footer {

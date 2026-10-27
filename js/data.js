@@ -271,11 +271,17 @@ JD.seedOrders = () => [
   {
     id: 'o2', no: 'YX20261023201008', time: '2026-10-23 20:10', status: 'shipped',
     payment: '在线支付',
+    paidAt: '2026-10-23 20:15',
+    shippedAt: '2026-10-23 22:40',
     items: [{ productId: 'p1', spec: '钛金属灰 / 256GB', qty: 1 }],
   },
   {
     id: 'o3', no: 'YX20261020090531', time: '2026-10-20 09:05', status: 'done',
     payment: '分期付款',
+    paidAt: '2026-10-20 09:10',
+    shippedAt: '2026-10-20 18:00',
+    doneAt: '2026-10-22 14:20',
+    review: { stars: 5, text: '坚果很新鲜，独立包装方便携带。', time: '2026-10-22 15:00' },
     items: [
       { productId: 'p16', spec: '750g 30 袋', qty: 2 },
       { productId: 'p15', spec: '24 瓶整箱', qty: 1 },
@@ -284,16 +290,21 @@ JD.seedOrders = () => [
   {
     id: 'o4', no: 'YX20261019112044', time: '2026-10-19 11:20', status: 'cancelled',
     payment: '在线支付',
+    cancelledAt: '2026-10-19 12:05',
     items: [{ productId: 'p12', spec: '白色', qty: 1 }],
   },
   {
     id: 'o5', no: 'YX20261018164507', time: '2026-10-18 16:45', status: 'paid',
     payment: '货到付款',
+    paidAt: '2026-10-18 16:50',
     items: [{ productId: 'p3', spec: '深空灰 / 32G+1T', qty: 1 }],
   },
   {
     id: 'o6', no: 'YX20261015100022', time: '2026-10-15 10:00', status: 'done',
     payment: '在线支付',
+    paidAt: '2026-10-15 10:05',
+    shippedAt: '2026-10-15 19:30',
+    doneAt: '2026-10-17 11:10',
     items: [{ productId: 'p14', spec: '黑色 / L', qty: 1 }],
   },
 ];

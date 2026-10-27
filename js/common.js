@@ -90,6 +90,14 @@ window.JD = window.JD || {};
     cancelled: '已取消',
   };
 
+  /** 状态 → 时间戳字段 */
+  const STATUS_STAMP = {
+    paid: 'paidAt',
+    shipped: 'shippedAt',
+    done: 'doneAt',
+    cancelled: 'cancelledAt',
+  };
+
   const round2 = (n) => Math.round(n * 100) / 100;
 
   const orders = {
@@ -137,6 +145,13 @@ window.JD = window.JD || {};
       const list = orders.all();
       const hit = list.find((o) => o.id === id);
       if (!hit) return null;
+
+      // 状态变化时补一条时间戳，供订单进度使用
+      if (patch.status && patch.status !== hit.status) {
+        const field = STATUS_STAMP[patch.status];
+        if (field) hit[field] = stamp();
+      }
+
       Object.assign(hit, patch);
       orders.save(list);
       return hit;
@@ -229,7 +244,15 @@ window.JD = window.JD || {};
 
   /* ---------------- 轻提示 ---------------- */
   let toastTimer = null;
-  function toast(text) {
+
+  /**
+   * 轻提示
+   * @param {string} text 提示文案
+   * @param {{actionText?: string, onAction?: Function, duration?: number}} [options] 可选操作按钮
+   */
+  function toast(text, options = {}) {
+    const { actionText, onAction, duration = 2200 } = options;
+
     let el = document.querySelector('.toast');
     if (!el) {
       el = document.createElement('div');
@@ -237,10 +260,74 @@ window.JD = window.JD || {};
       el.setAttribute('role', 'status');
       document.body.appendChild(el);
     }
-    el.textContent = text;
+
+    el.innerHTML = `<span class="toast-text">${esc(text)}</span>${
+      actionText ? `<button type="button" class="toast-action">${esc(actionText)}</button>` : ''
+    }`;
+
+    if (actionText) {
+      el.querySelector('.toast-action').addEventListener('click', () => {
+        el.classList.remove('is-show');
+        if (typeof onAction === 'function') onAction();
+      });
+    }
+
     requestAnimationFrame(() => el.classList.add('is-show'));
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => el.classList.remove('is-show'), 2200);
+    toastTimer = setTimeout(() => el.classList.remove('is-show'), actionText ? Math.max(duration, 5000) : duration);
+  }
+
+  /* ---------------- 确认弹窗 ---------------- */
+  let confirmResolve = null;
+
+  /**
+   * 自定义确认框，返回 Promise<boolean>，替代原生 confirm
+   * @param {{title?: string, message?: string, okText?: string, cancelText?: string, danger?: boolean}} options
+   */
+  function confirmDialog(options = {}) {
+    const {
+      title = '操作确认',
+      message = '',
+      okText = '确定',
+      cancelText = '取消',
+      danger = false,
+    } = options;
+
+    return new Promise((resolve) => {
+      const el = document.createElement('div');
+      el.className = 'modal confirm-modal';
+      el.innerHTML = `
+        <div class="modal-mask" data-cancel></div>
+        <div class="confirm-panel" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+          <h3 id="confirmTitle">${esc(title)}</h3>
+          <p>${esc(message)}</p>
+          <div class="confirm-actions">
+            <button type="button" class="btn btn-ghost" data-cancel>${esc(cancelText)}</button>
+            <button type="button" class="btn ${danger ? 'btn-danger' : 'btn-primary'}" data-ok>${esc(okText)}</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(el);
+
+      const finish = (value) => {
+        el.remove();
+        document.removeEventListener('keydown', onKey);
+        confirmResolve = null;
+        resolve(value);
+      };
+      const onKey = (event) => {
+        if (event.key === 'Escape') finish(false);
+      };
+
+      el.addEventListener('click', (event) => {
+        if (event.target.closest('[data-ok]')) finish(true);
+        else if (event.target.closest('[data-cancel]')) finish(false);
+      });
+      document.addEventListener('keydown', onKey);
+
+      confirmResolve = finish;
+      el.querySelector('[data-ok]').focus();
+    });
   }
 
   /* ---------------- 搜索历史 ---------------- */
@@ -743,7 +830,7 @@ window.JD = window.JD || {};
   Object.assign(JD, {
     store, money, esc, stamp,
     user, orders, messages, fav, searchHistory,
-    toast, openDetail, closeDetail,
+    toast, confirm: confirmDialog, openDetail, closeDetail,
     updateBadges, STATUS_TEXT,
   });
 

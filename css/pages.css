@@ -317,7 +317,7 @@
 
 /* 订单详情展开 */
 .order-detail { padding: 2px 16px 14px; background: #fbfbfc; border-top: 1px dashed var(--line); }
-.od-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 12px 0; }
+.od-cols { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; padding: 12px 0; }
 .od-col h5 { margin-bottom: 4px; color: var(--text-2); font-size: 13px; font-weight: 600; }
 .od-col p { color: var(--text-3); font-size: 12.5px; line-height: 1.8; }
 .od-amount {
@@ -330,6 +330,75 @@
   font-size: 13px;
 }
 .od-total { color: var(--brand); font-weight: 600; }
+
+/* 订单进度时间线 */
+.od-timeline li {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 2px 0;
+  color: var(--text-2);
+  font-size: 12.5px;
+}
+.od-timeline li::before {
+  content: "";
+  flex: none;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--brand);
+  transform: translateY(-2px);
+}
+.od-timeline time { margin-left: auto; color: var(--text-3); font-size: 12px; }
+
+/* 订单里的评价 */
+.od-review { padding: 10px 0 2px; border-top: 1px solid var(--line); }
+.od-review h5 { margin-bottom: 6px; color: var(--text-2); font-size: 13px; font-weight: 600; }
+.od-review p { color: var(--text-2); font-size: 13px; line-height: 1.8; }
+.od-review-time { margin-left: 8px; color: var(--text-3); font-size: 12px; }
+
+/* 评价弹层 */
+.review-panel {
+  position: relative;
+  z-index: 1;
+  width: 460px;
+  padding: 24px;
+  border-radius: 16px;
+  background: var(--card);
+  box-shadow: var(--shadow-2);
+  animation: modal-in 0.2s ease-out;
+}
+.review-panel h3 { font-size: 18px; font-weight: 700; }
+.review-goods {
+  margin-top: 8px;
+  overflow: hidden;
+  color: var(--text-3);
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.star-input { display: flex; gap: 6px; margin-top: 16px; }
+.star-input .star {
+  color: #e3e6ea;
+  font-size: 26px;
+  line-height: 1;
+  transition: color 0.15s, transform 0.15s;
+}
+.star-input .star.is-on { color: #ff9f1c; }
+.star-input .star:hover { transform: scale(1.08); }
+.review-panel textarea {
+  width: 100%;
+  margin-top: 16px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  outline: none;
+  font: inherit;
+  font-size: 13px;
+  resize: none;
+}
+.review-panel textarea:focus { border-color: var(--brand); }
+.review-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
 
 /* 分页 */
 .pager { display: flex; align-items: center; justify-content: center; gap: 12px; padding-top: 18px; }
