@@ -416,6 +416,8 @@
 }
 .msg-item:hover { background: #fafbfc; }
 .msg-item:last-child { border-bottom: 0; }
+.msg-item.is-unread { background: #fffaf9; }
+.msg-item.is-unread:hover { background: #fff5f3; }
 .msg-icon {
   display: flex;
   align-items: center;
@@ -439,6 +441,31 @@
   white-space: nowrap;
 }
 .msg-time { flex: none; color: var(--text-3); font-size: 12px; }
+
+/* 消息详情弹层 */
+.msg-panel {
+  position: relative;
+  z-index: 1;
+  width: 480px;
+  padding: 24px;
+  border-radius: 16px;
+  background: var(--card);
+  box-shadow: var(--shadow-2);
+  animation: modal-in 0.2s ease-out;
+}
+.msg-panel-head { display: flex; align-items: center; gap: 12px; padding-right: 24px; }
+.msg-panel-head h3 { font-size: 17px; font-weight: 700; }
+.msg-panel-meta { margin-top: 2px; color: var(--text-3); font-size: 12px; }
+.msg-panel-text {
+  margin-top: 16px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: #fafbfc;
+  color: var(--text-2);
+  font-size: 14px;
+  line-height: 1.8;
+}
+.msg-panel-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
 
 /* ---------------- 我的页 ---------------- */
 .profile-hero { display: flex; align-items: center; gap: 18px; padding: 24px; }

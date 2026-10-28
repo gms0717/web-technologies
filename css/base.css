@@ -289,6 +289,23 @@ input { font: inherit; color: inherit; }
 }
 .tab:hover { background: #f6f7f9; }
 .tab.is-active { background: var(--brand); color: #fff; }
+.tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 17px;
+  height: 17px;
+  margin-left: 5px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: var(--brand);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  vertical-align: 1px;
+}
+.tab.is-active .tab-badge { background: rgba(255, 255, 255, 0.28); }
 
 .price { color: var(--brand); font-weight: 700; }
 .price .yen { font-size: 12px; font-weight: 600; margin-right: 1px; }
