@@ -239,12 +239,12 @@ JD.seedMessages = () => [
   { id: 'm6', cat: 'system', title: '服务升级公告', text: '本站将于周日凌晨进行系统维护，期间部分功能可能短暂不可用。', time: '10-21 18:00', read: true },
 ];
 
-/** 默认收货地址与支付方式（纯演示数据） */
-JD.addresses = [
+/** 收货地址初始数据（之后由「我的」页增删改，存 localStorage） */
+JD.seedAddresses = () => [
   {
     id: 'a1',
     name: '林小优',
-    phone: '138****8888',
+    phone: '13800008888',
     region: '北京市 朝阳区',
     detail: '望京街道 望京西园 1 号楼 802 室',
     isDefault: true,
@@ -252,14 +252,31 @@ JD.addresses = [
   {
     id: 'a2',
     name: '林小优',
-    phone: '138****8888',
+    phone: '13800008888',
     region: '上海市 浦东新区',
     detail: '张江镇 科苑路 88 号 B 座 1203',
     isDefault: false,
   },
 ];
 
-JD.defaultAddress = JD.addresses[0];
+/** 资产明细（演示数据，配合「我的资产」弹层） */
+JD.assets = {
+  coupons: [
+    { title: '满 3000 减 300', desc: '全场通用 · 有效期至 11-11', value: 300 },
+    { title: '满 500 减 50', desc: '家用电器专用 · 有效期至 11-08', value: 50 },
+    { title: '新人 20 元无门槛', desc: '首单可用 · 有效期至 11-30', value: 20 },
+  ],
+  points: [
+    { title: '购物获得', desc: '订单 YX20261020090531', amount: '+200' },
+    { title: '评价获得', desc: '评价「每日坚果」', amount: '+50' },
+    { title: '兑换优惠券', desc: '兑换「满 500 减 50」', amount: '-100' },
+    { title: '购物获得', desc: '订单 YX20261015100022', amount: '+1130' },
+  ],
+  packets: [
+    { title: '新人红包', desc: '满 100 可用 · 有效期至 11-30', value: 10 },
+    { title: '活动红包', desc: '满 50 可用 · 有效期至 11-15', value: 5 },
+  ],
+};
 
 /** 演示订单（首次打开时写入本地，方便直接看效果） */
 JD.seedOrders = () => [

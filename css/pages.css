@@ -509,9 +509,99 @@
 .stat span { color: var(--text-3); font-size: 13px; }
 
 .asset-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; text-align: center; }
-.asset { padding: 6px 0; }
+.asset {
+  display: block;
+  width: 100%;
+  padding: 6px 0;
+  border-radius: 10px;
+  transition: background-color 0.18s;
+}
+.asset:hover { background: #fafbfc; }
 .asset b { display: block; font-size: 20px; }
 .asset span { color: var(--text-3); font-size: 13px; }
+
+/* 资产明细弹层 */
+.asset-panel {
+  position: relative;
+  z-index: 1;
+  width: 480px;
+  padding: 24px;
+  border-radius: 16px;
+  background: var(--card);
+  box-shadow: var(--shadow-2);
+  animation: modal-in 0.2s ease-out;
+}
+.asset-panel h3 { font-size: 17px; font-weight: 700; }
+.asset-list { margin-top: 12px; }
+.asset-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px dashed var(--line);
+}
+.asset-row:last-child { border-bottom: 0; }
+.asset-row-main { flex: 1; min-width: 0; }
+.asset-row h4 { font-size: 14px; font-weight: 600; }
+.asset-row p { margin-top: 2px; color: var(--text-3); font-size: 12.5px; }
+.asset-row b { flex: none; color: var(--brand); font-size: 15px; }
+
+/* 收货地址弹层 */
+.addr-panel {
+  position: relative;
+  z-index: 1;
+  width: 560px;
+  padding: 24px;
+  border-radius: 16px;
+  background: var(--card);
+  box-shadow: var(--shadow-2);
+  animation: modal-in 0.2s ease-out;
+}
+.addr-panel h3 { font-size: 17px; font-weight: 700; }
+.addr-tip { margin-top: 6px; color: var(--text-3); font-size: 12.5px; }
+.addr-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 380px;
+  margin-top: 14px;
+  overflow: auto;
+}
+.addr-item { padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; }
+.addr-item.is-default { border-color: #ffc9c2; background: #fffafa; }
+.addr-line1 { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; }
+.addr-phone { color: var(--text-2); font-weight: 400; }
+.addr-badge {
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: var(--brand-soft);
+  color: var(--brand);
+  font-size: 11px;
+  font-weight: 500;
+}
+.addr-text { margin-top: 4px; color: var(--text-3); font-size: 12.5px; }
+.addr-actions { display: flex; align-items: center; gap: 14px; margin-top: 8px; font-size: 12.5px; }
+.addr-actions button { color: var(--text-2); }
+.addr-actions button:hover { color: var(--brand); }
+.addr-current { color: var(--brand); }
+.addr-empty { padding: 20px 0; color: var(--text-3); font-size: 13px; text-align: center; }
+.addr-foot { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
+.addr-form { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field.is-full, .checkbox.is-full, .addr-error.is-full { grid-column: 1 / -1; }
+.field label { color: var(--text-3); font-size: 12.5px; }
+.field input {
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  outline: none;
+  font-size: 13px;
+}
+.field input:focus { border-color: var(--brand); }
+.checkbox { display: flex; align-items: center; gap: 8px; color: var(--text-2); font-size: 13px; }
+.checkbox input { accent-color: var(--brand); }
+.addr-error { margin: 0; color: var(--brand); font-size: 12.5px; }
 
 .menu-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
 .menu-item {

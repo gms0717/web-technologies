@@ -76,7 +76,7 @@
   }
 
   function detailHtml(order) {
-    const address = order.address || JD.defaultAddress;
+    const address = order.address || JD.addresses.getDefault();
     const goodsTotal = order.items.reduce((sum, it) => sum + it.price * it.qty, 0);
     const discount = Math.round((goodsTotal - order.total) * 100) / 100;
 

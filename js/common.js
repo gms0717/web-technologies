@@ -15,6 +15,7 @@ window.JD = window.JD || {};
     fav: 'yx_fav',
     seeded: 'yx_seeded',
     history: 'yx_search_history',
+    addresses: 'yx_addresses',
   };
 
   /* ---------------- 本地存储 ---------------- */
@@ -133,7 +134,7 @@ window.JD = window.JD || {};
         time: stamp(now),
         status: 'unpaid',
         payment: '在线支付',
-        address: JD.defaultAddress,
+        address: addresses.getDefault(),
         items: snapshot,
         total: round2(snapshot.reduce((sum, it) => sum + it.price * it.qty, 0)),
       };
@@ -215,6 +216,52 @@ window.JD = window.JD || {};
     },
   };
 
+  /* ---------------- 收货地址 ---------------- */
+  const addresses = {
+    all() {
+      const list = store.get(KEYS.addresses, []);
+      return Array.isArray(list) ? list : [];
+    },
+    save(list) {
+      store.set(KEYS.addresses, list);
+    },
+    get(id) {
+      return addresses.all().find((item) => item.id === id) || null;
+    },
+    getDefault() {
+      const list = addresses.all();
+      return list.find((item) => item.isDefault) || list[0] || null;
+    },
+    /** 新增或更新，返回保存后的地址 */
+    upsert(data) {
+      const list = addresses.all();
+      let target = data.id ? list.find((item) => item.id === data.id) : null;
+
+      if (target) {
+        Object.assign(target, data);
+      } else {
+        target = { ...data, id: 'a' + Date.now().toString(36) };
+        list.push(target);
+      }
+
+      if (target.isDefault) {
+        list.forEach((item) => { item.isDefault = item.id === target.id; });
+      }
+      if (!list.some((item) => item.isDefault) && list.length) list[0].isDefault = true;
+
+      addresses.save(list);
+      return target;
+    },
+    remove(id) {
+      const list = addresses.all().filter((item) => item.id !== id);
+      if (list.length && !list.some((item) => item.isDefault)) list[0].isDefault = true;
+      addresses.save(list);
+    },
+    setDefault(id) {
+      addresses.save(addresses.all().map((item) => ({ ...item, isDefault: item.id === id })));
+    },
+  };
+
   /* ---------------- 初始化演示数据 ---------------- */
   function seed() {
     if (store.get(KEYS.seeded, false)) return;
@@ -232,7 +279,7 @@ window.JD = window.JD || {};
       const items = snapshot(order.items);
       return {
         ...order,
-        address: JD.defaultAddress,
+        address: addresses.getDefault(),
         items,
         total: round2(items.reduce((sum, it) => sum + it.price * it.qty, 0)),
       };
@@ -820,6 +867,9 @@ window.JD = window.JD || {};
 
   /* ---------------- 初始化 ---------------- */
   function init() {
+    // 地址单独初始化，兼容已经有订单数据的旧本地存储
+    if (!store.get(KEYS.addresses)) store.set(KEYS.addresses, JD.seedAddresses());
+
     seed();
     renderHeader();
     renderFooter();
@@ -829,7 +879,7 @@ window.JD = window.JD || {};
 
   Object.assign(JD, {
     store, money, esc, stamp,
-    user, orders, messages, fav, searchHistory,
+    user, orders, messages, fav, searchHistory, addresses,
     toast, confirm: confirmDialog, openDetail, closeDetail,
     updateBadges, STATUS_TEXT,
   });
