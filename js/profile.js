@@ -301,6 +301,104 @@
     paintList();
   }
 
+  /* ---------------- 收藏 / 浏览记录 ---------------- */
+  function openList(kind) {
+    const isFav = kind === 'fav';
+    const el = document.createElement('div');
+    el.className = 'modal';
+    el.innerHTML = `
+      <div class="modal-mask" data-close></div>
+      <div class="list-panel" role="dialog" aria-modal="true" aria-labelledby="listTitle">
+        <button class="modal-close" type="button" data-close aria-label="关闭">✕</button>
+        <div class="list-head">
+          <h3 id="listTitle">${isFav ? '我的收藏' : '浏览记录'}</h3>
+          <button type="button" class="btn btn-ghost btn-sm" data-clear hidden>清空</button>
+        </div>
+        <div id="listBody"></div>
+      </div>
+    `;
+    document.body.appendChild(el);
+
+    const body = el.querySelector('#listBody');
+    const clearBtn = el.querySelector('[data-clear]');
+
+    function entries() {
+      return isFav ? JD.fav.all().map((id) => ({ id })) : JD.footprint.all();
+    }
+
+    function paint() {
+      const list = entries()
+        .map((entry) => ({ ...entry, product: JD.getProduct(entry.id) }))
+        .filter((entry) => entry.product);
+
+      clearBtn.hidden = list.length === 0;
+
+      if (!list.length) {
+        body.innerHTML = `
+          <div class="empty">
+            <div class="empty-icon">${isFav ? '⭐' : '🕘'}</div>
+            <p>${isFav ? '还没有收藏的商品，去首页逛逛吧' : '还没有浏览记录，去首页看看吧'}</p>
+            <a class="btn btn-primary" href="index.html">去逛逛</a>
+          </div>`;
+        return;
+      }
+
+      body.innerHTML = `<div class="mini-grid">${list.map((entry) => `
+        <div class="mini-card">
+          <button type="button" class="mini-thumb" data-open="${entry.product.id}"
+                  aria-label="查看 ${esc(entry.product.name)}">
+            <img src="${entry.product.img}" alt="" width="400" height="400" loading="lazy">
+          </button>
+          <p class="mini-name">${esc(entry.product.name)}</p>
+          <div class="mini-meta">
+            <span class="price"><span class="yen">¥</span>${JD.money(entry.product.price)}</span>
+            <button type="button" class="mini-del" data-remove="${entry.product.id}">${isFav ? '取消收藏' : '删除'}</button>
+          </div>
+          ${isFav ? '' : `<p class="mini-time">${esc(entry.time || '')}</p>`}
+        </div>`).join('')}</div>`;
+    }
+
+    el.addEventListener('click', async (event) => {
+      if (event.target.closest('[data-close]')) {
+        el.remove();
+        renderMenu();
+        return;
+      }
+
+      const open = event.target.closest('[data-open]');
+      if (open) {
+        el.remove();
+        renderMenu();
+        JD.openDetail(open.dataset.open);
+        return;
+      }
+
+      const remove = event.target.closest('[data-remove]');
+      if (remove) {
+        if (isFav) JD.fav.toggle(remove.dataset.remove);
+        else JD.footprint.remove(remove.dataset.remove);
+        paint();
+        return;
+      }
+
+      if (event.target.closest('[data-clear]')) {
+        const ok = await JD.confirm({
+          title: isFav ? '清空收藏' : '清空浏览记录',
+          message: '清空后不可恢复，确定要清空吗？',
+          okText: '清空',
+          danger: true,
+        });
+        if (!ok) return;
+        if (isFav) JD.fav.clear();
+        else JD.footprint.clear();
+        paint();
+        renderMenu();
+      }
+    });
+
+    paint();
+  }
+
   /* ---------------- 常用功能 ---------------- */
   function renderMenu() {
     const host = document.getElementById('menuGrid');
@@ -308,21 +406,26 @@
 
     const items = [
       { icon: '📍', label: '收货地址', action: 'addresses' },
-      { icon: '⭐', label: '收藏商品' },
-      { icon: '🕘', label: '浏览记录' },
+      { icon: '⭐', label: '收藏商品', action: 'fav', count: JD.fav.all().length },
+      { icon: '🕘', label: '浏览记录', action: 'footprint', count: JD.footprint.all().length },
       { icon: '❓', label: '帮助中心' },
     ];
 
     host.innerHTML = items.map((item) => (item.action
       ? `<button type="button" class="menu-item" data-action="${item.action}">
-           <span class="menu-icon" aria-hidden="true">${item.icon}</span>${item.label}
+           <span class="menu-icon" aria-hidden="true">${item.icon}</span>
+           <span class="menu-label">${item.label}${item.count ? `<span class="menu-count">${item.count}</span>` : ''}</span>
          </button>`
       : `<a class="menu-item" href="#" data-toast="「${item.label}」将在后续更新中开放">
            <span class="menu-icon" aria-hidden="true">${item.icon}</span>${item.label}
          </a>`)).join('');
 
-    const addrBtn = host.querySelector('[data-action="addresses"]');
-    if (addrBtn) addrBtn.addEventListener('click', openAddresses);
+    host.querySelectorAll('[data-action]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        if (btn.dataset.action === 'addresses') openAddresses();
+        else openList(btn.dataset.action);
+      });
+    });
   }
 
   document.addEventListener('DOMContentLoaded', () => {

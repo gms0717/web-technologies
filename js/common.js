@@ -16,6 +16,7 @@ window.JD = window.JD || {};
     seeded: 'yx_seeded',
     history: 'yx_search_history',
     addresses: 'yx_addresses',
+    footprint: 'yx_footprint',
   };
 
   /* ---------------- 本地存储 ---------------- */
@@ -213,6 +214,31 @@ window.JD = window.JD || {};
       const next = list.includes(id) ? list.filter((x) => x !== id) : [...list, id];
       store.set(KEYS.fav, next);
       return next.includes(id);
+    },
+    clear() {
+      store.set(KEYS.fav, []);
+    },
+  };
+
+  /* ---------------- 浏览足迹 ---------------- */
+  const FOOTPRINT_MAX = 20;
+
+  const footprint = {
+    all() {
+      const list = store.get(KEYS.footprint, []);
+      return Array.isArray(list) ? list : [];
+    },
+    push(id) {
+      if (!JD.getProduct(id)) return;
+      const list = footprint.all().filter((item) => item.id !== id);
+      list.unshift({ id, time: stamp() });
+      store.set(KEYS.footprint, list.slice(0, FOOTPRINT_MAX));
+    },
+    remove(id) {
+      store.set(KEYS.footprint, footprint.all().filter((item) => item.id !== id));
+    },
+    clear() {
+      store.set(KEYS.footprint, []);
     },
   };
 
@@ -838,6 +864,8 @@ window.JD = window.JD || {};
     const product = JD.getProduct(productId);
     if (!product) return;
 
+    footprint.push(productId);
+
     const spec = {};
     Object.entries(product.specs || {}).forEach(([key, values]) => { spec[key] = values[0]; });
 
@@ -879,7 +907,7 @@ window.JD = window.JD || {};
 
   Object.assign(JD, {
     store, money, esc, stamp,
-    user, orders, messages, fav, searchHistory, addresses,
+    user, orders, messages, fav, footprint, searchHistory, addresses,
     toast, confirm: confirmDialog, openDetail, closeDetail,
     updateBadges, STATUS_TEXT,
   });
