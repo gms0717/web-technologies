@@ -99,26 +99,21 @@
     `;
     document.body.appendChild(el);
 
-    const onKey = (event) => {
-      if (event.key === 'Escape') {
-        el.remove();
-        document.removeEventListener('keydown', onKey);
-      }
+    const close = () => {
+      JD.closeLayer(el);
+      el.remove();
     };
-    document.addEventListener('keydown', onKey);
 
     el.addEventListener('click', (event) => {
       if (event.target.closest('[data-delete]')) {
-        el.remove();
-        document.removeEventListener('keydown', onKey);
+        close();
         deleteMessage(id);
         return;
       }
-      if (event.target.closest('[data-close]')) {
-        el.remove();
-        document.removeEventListener('keydown', onKey);
-      }
+      if (event.target.closest('[data-close]')) close();
     });
+
+    JD.registerLayer(el, close);
   }
 
   function deleteMessage(id) {

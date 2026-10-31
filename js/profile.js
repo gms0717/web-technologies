@@ -139,10 +139,17 @@
     `;
     document.body.appendChild(el);
 
+    const close = () => {
+      JD.closeLayer(el);
+      el.remove();
+    };
+
     el.addEventListener('click', (event) => {
-      if (event.target.closest('[data-close]')) el.remove();
+      if (event.target.closest('[data-close]')) close();
       else if (event.target.closest('[data-use]')) JD.toast('可在下单时使用（演示）');
     });
+
+    JD.registerLayer(el, close);
   }
 
   /* ---------------- 收货地址 ---------------- */
@@ -158,6 +165,11 @@
       </div>
     `;
     document.body.appendChild(el);
+
+    const close = () => {
+      JD.closeLayer(el);
+      el.remove();
+    };
 
     const body = el.querySelector('#addrBody');
     let editing = null;
@@ -234,7 +246,7 @@
 
     el.addEventListener('click', async (event) => {
       if (event.target.closest('[data-close]')) {
-        el.remove();
+        close();
         return;
       }
 
@@ -298,6 +310,7 @@
       }
     });
 
+    JD.registerLayer(el, close);
     paintList();
   }
 
@@ -318,6 +331,12 @@
       </div>
     `;
     document.body.appendChild(el);
+
+    const close = () => {
+      JD.closeLayer(el);
+      el.remove();
+      renderMenu();
+    };
 
     const body = el.querySelector('#listBody');
     const clearBtn = el.querySelector('[data-clear]');
@@ -360,15 +379,13 @@
 
     el.addEventListener('click', async (event) => {
       if (event.target.closest('[data-close]')) {
-        el.remove();
-        renderMenu();
+        close();
         return;
       }
 
       const open = event.target.closest('[data-open]');
       if (open) {
-        el.remove();
-        renderMenu();
+        close();
         JD.openDetail(open.dataset.open);
         return;
       }
@@ -396,6 +413,7 @@
       }
     });
 
+    JD.registerLayer(el, close);
     paint();
   }
 

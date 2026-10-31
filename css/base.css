@@ -421,6 +421,18 @@ input { font: inherit; color: inherit; }
 .confirm-panel p { margin-top: 10px; color: var(--text-2); font-size: 13.5px; line-height: 1.7; }
 .confirm-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
 
+/* 尊重系统「减少动效」设置 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* ---------------- 页脚 ---------------- */
 .app-footer {
   margin-top: 8px;

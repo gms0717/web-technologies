@@ -288,6 +288,57 @@ window.JD = window.JD || {};
     },
   };
 
+  /* ---------------- 弹层栈（统一 Esc / 焦点） ---------------- */
+  const layerStack = [];
+
+  /**
+   * 注册一个弹层：打开时记住触发元素并聚焦面板，Esc 时调用 onClose，关闭后焦点归位
+   * @param {HTMLElement} el 弹层根节点
+   * @param {Function} onClose 关闭逻辑（负责移除 / 隐藏并调用 closeLayer）
+   */
+  function registerLayer(el, onClose) {
+    const trigger = document.activeElement;
+    layerStack.push({ el, trigger, onClose });
+
+    // 面板内的第一个可交互元素；有 [autofocus] 则优先
+    const target = el.querySelector('[autofocus]')
+      || el.querySelector('.modal-close')
+      || el.querySelector('button, [href], input, textarea, select');
+
+    if (target) {
+      setTimeout(() => {
+        if (document.contains(el)) target.focus({ preventScroll: true });
+      }, 0);
+    }
+  }
+
+  /** 出栈并把焦点还给触发元素 */
+  function closeLayer(el) {
+    const index = layerStack.findIndex((layer) => layer.el === el);
+    if (index < 0) return;
+
+    const [layer] = layerStack.splice(index, 1);
+    if (layer.trigger && document.contains(layer.trigger)) {
+      layer.trigger.focus({ preventScroll: true });
+    }
+  }
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape') return;
+
+    // 清理已经被直接移除、没走 closeLayer 的残留
+    while (layerStack.length && !document.contains(layerStack[layerStack.length - 1].el)) {
+      layerStack.pop();
+    }
+    if (!layerStack.length) return;
+
+    const top = layerStack[layerStack.length - 1];
+    if (typeof top.onClose === 'function') {
+      event.stopPropagation();
+      top.onClose();
+    }
+  });
+
   /* ---------------- 初始化演示数据 ---------------- */
   function seed() {
     if (store.get(KEYS.seeded, false)) return;
@@ -376,30 +427,26 @@ window.JD = window.JD || {};
           <p>${esc(message)}</p>
           <div class="confirm-actions">
             <button type="button" class="btn btn-ghost" data-cancel>${esc(cancelText)}</button>
-            <button type="button" class="btn ${danger ? 'btn-danger' : 'btn-primary'}" data-ok>${esc(okText)}</button>
+            <button type="button" class="btn ${danger ? 'btn-danger' : 'btn-primary'}" data-ok autofocus>${esc(okText)}</button>
           </div>
         </div>
       `;
       document.body.appendChild(el);
 
       const finish = (value) => {
+        closeLayer(el);
         el.remove();
-        document.removeEventListener('keydown', onKey);
         confirmResolve = null;
         resolve(value);
-      };
-      const onKey = (event) => {
-        if (event.key === 'Escape') finish(false);
       };
 
       el.addEventListener('click', (event) => {
         if (event.target.closest('[data-ok]')) finish(true);
         else if (event.target.closest('[data-cancel]')) finish(false);
       });
-      document.addEventListener('keydown', onKey);
 
       confirmResolve = finish;
-      el.querySelector('[data-ok]').focus();
+      registerLayer(el, () => finish(false));
     });
   }
 
@@ -730,9 +777,6 @@ window.JD = window.JD || {};
     modalEl.addEventListener('click', (event) => {
       if (event.target.closest('[data-close]')) closeDetail();
     });
-    document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape' && !modalEl.hidden) closeDetail();
-    });
 
     return modalEl;
   }
@@ -874,12 +918,14 @@ window.JD = window.JD || {};
     paintDetail();
     modalEl.hidden = false;
     document.body.style.overflow = 'hidden';
+    registerLayer(modalEl, closeDetail);
   }
 
   function closeDetail() {
     if (!modalEl) return;
     modalEl.hidden = true;
     document.body.style.overflow = '';
+    closeLayer(modalEl);
   }
 
   /* ---------------- 全局事件 ---------------- */
@@ -909,7 +955,7 @@ window.JD = window.JD || {};
     store, money, esc, stamp,
     user, orders, messages, fav, footprint, searchHistory, addresses,
     toast, confirm: confirmDialog, openDetail, closeDetail,
-    updateBadges, STATUS_TEXT,
+    registerLayer, closeLayer, updateBadges, STATUS_TEXT,
   });
 
   JD.init = init;

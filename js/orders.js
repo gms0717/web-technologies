@@ -54,7 +54,7 @@
   function itemHtml(item) {
     return `
       <div class="order-item">
-        <img src="${item.img}" alt="" width="64" height="64">
+        <img src="${item.img}" alt="" width="64" height="64" loading="lazy">
         <div class="order-item-info">
           <p class="order-item-name">${esc(item.name)}</p>
           <p class="order-item-spec">${esc(item.spec)}</p>
@@ -264,7 +264,8 @@
         <p class="review-goods">${esc(order.items.map((it) => it.name).join('、'))}</p>
         <div class="star-input" role="radiogroup" aria-label="评分">
           ${[1, 2, 3, 4, 5].map((n) => `
-            <button type="button" class="star${n <= reviewStars ? ' is-on' : ''}" data-star="${n}" aria-label="${n} 星">★</button>
+            <button type="button" class="star${n <= reviewStars ? ' is-on' : ''}" data-star="${n}"
+                    aria-label="${n} 星"${n === 1 ? ' autofocus' : ''}>★</button>
           `).join('')}
         </div>
         <textarea id="reviewText" rows="3" maxlength="80" placeholder="说说你的使用感受（选填）"></textarea>
@@ -275,6 +276,11 @@
       </div>
     `;
     document.body.appendChild(el);
+
+    const close = () => {
+      JD.closeLayer(el);
+      el.remove();
+    };
 
     const paint = () => {
       el.querySelectorAll('.star').forEach((star) => {
@@ -298,14 +304,16 @@
             time: JD.stamp(),
           },
         });
-        el.remove();
+        close();
         JD.toast('评价已提交，感谢反馈');
         render();
         return;
       }
 
-      if (event.target.closest('[data-close]')) el.remove();
+      if (event.target.closest('[data-close]')) close();
     });
+
+    JD.registerLayer(el, close);
   }
 
   /* ---------------- 交互 ---------------- */
