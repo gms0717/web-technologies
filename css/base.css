@@ -27,6 +27,18 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+::selection { background: rgba(232, 69, 60, 0.16); }
+
+/* 桌面端滚动条：细一点，和整体风格一致 */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  border: 2px solid var(--bg);
+  border-radius: 6px;
+  background: #d5d9df;
+}
+::-webkit-scrollbar-thumb:hover { background: #c2c8d0; }
+
 body {
   min-width: 1240px; /* 只做电脑端：窄窗口横向滚动，不做移动端适配 */
   background: var(--bg);
@@ -268,8 +280,9 @@ input { font: inherit; color: inherit; }
   padding: 0 18px;
   border-radius: 18px;
   font-size: 13px;
-  transition: background-color 0.18s, color 0.18s, border-color 0.18s, opacity 0.18s;
+  transition: background-color 0.18s, color 0.18s, border-color 0.18s, opacity 0.18s, transform 0.12s;
 }
+.btn:active:not([disabled]) { transform: translateY(1px); }
 .btn-primary { background: var(--brand); color: #fff; }
 .btn-primary:hover { background: var(--brand-dark); color: #fff; }
 .btn-danger { background: #cf352b; color: #fff; }
@@ -278,6 +291,22 @@ input { font: inherit; color: inherit; }
 .btn-ghost:hover { border-color: var(--brand); color: var(--brand); }
 .btn-sm { height: 30px; padding: 0 14px; font-size: 12px; }
 .btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+
+/* 列表 / 卡片入场：fill-mode 用 backwards，动画结束后不影响 hover 的 transform */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+.order-card,
+.msg-item,
+.goods-card,
+.mini-card {
+  animation: fade-up 0.26s ease-out backwards;
+}
+.order-card:nth-child(2), .msg-item:nth-child(2), .goods-card:nth-child(2), .mini-card:nth-child(2) { animation-delay: 0.03s; }
+.order-card:nth-child(3), .msg-item:nth-child(3), .goods-card:nth-child(3), .mini-card:nth-child(3) { animation-delay: 0.06s; }
+.order-card:nth-child(4), .msg-item:nth-child(4), .goods-card:nth-child(4), .mini-card:nth-child(4) { animation-delay: 0.09s; }
+.order-card:nth-child(5), .msg-item:nth-child(5), .goods-card:nth-child(5), .mini-card:nth-child(5) { animation-delay: 0.12s; }
 
 .tabs { display: flex; flex-wrap: wrap; gap: 8px; }
 .tab {
@@ -324,11 +353,22 @@ input { font: inherit; color: inherit; }
 }
 
 .empty {
-  padding: 70px 0 80px;
+  padding: 64px 0 72px;
   text-align: center;
   color: var(--text-3);
 }
-.empty .empty-icon { font-size: 40px; line-height: 1; margin-bottom: 12px; }
+.empty .empty-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fff4f2, #f2f4f7);
+  font-size: 28px;
+  line-height: 1;
+}
 .empty p { font-size: 14px; margin-bottom: 16px; }
 
 /* ---------------- 轻提示 ---------------- */

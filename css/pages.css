@@ -86,9 +86,13 @@
   border-radius: 12px;
   background: #fff;
   text-align: center;
-  transition: border-color 0.18s, background-color 0.18s, color 0.18s;
+  transition: border-color 0.18s, background-color 0.18s, color 0.18s, transform 0.18s, box-shadow 0.18s;
 }
-.cat-item:hover { border-color: #ffd9d4; }
+.cat-item:hover {
+  border-color: #ffd9d4;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(23, 26, 31, 0.06);
+}
 .cat-item .cat-icon { display: block; margin-bottom: 6px; font-size: 24px; line-height: 1; }
 .cat-item .cat-name { font-size: 13px; color: var(--text-2); }
 .cat-item.is-active { background: var(--brand-soft); border-color: #ffc9c2; }
@@ -504,8 +508,14 @@
 .profile-edit input:focus { border-color: var(--brand); }
 
 .stat-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; text-align: center; }
-.stat { padding: 8px 0; }
-.stat b { display: block; color: var(--brand); font-size: 22px; }
+.stat {
+  padding: 8px 0;
+  border-radius: 10px;
+  transition: background-color 0.18s, transform 0.18s;
+}
+.stat:hover { background: #fafbfc; }
+.stat:hover b { transform: scale(1.04); }
+.stat b { display: block; color: var(--brand); font-size: 22px; transition: transform 0.18s; }
 .stat span { color: var(--text-3); font-size: 13px; }
 
 .asset-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; text-align: center; }
