@@ -895,6 +895,13 @@ window.JD = window.JD || {};
 
     body.querySelector('[data-buy]').addEventListener('click', () => {
       const { product, spec, qty } = detailState;
+
+      // 没有收货地址时不放行，避免生成无法履约的订单
+      if (!addresses.getDefault()) {
+        toast('请先在「我的 - 收货地址」中添加收货地址');
+        return;
+      }
+
       const specText = Object.values(spec).filter(Boolean).join(' / ');
       const order = orders.create([{ productId: product.id, spec: specText, qty, price: unitPrice() }]);
       if (!order) return;

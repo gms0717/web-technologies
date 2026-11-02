@@ -76,7 +76,10 @@
   }
 
   function detailHtml(order) {
-    const address = order.address || JD.addresses.getDefault();
+    // 历史订单可能没有地址（例如地址被删光后下的单），这里兜底避免详情报错
+    const address = order.address || JD.addresses.getDefault() || {
+      name: '未填写', phone: '', region: '', detail: '下单时没有可用的收货地址',
+    };
     const goodsTotal = order.items.reduce((sum, it) => sum + it.price * it.qty, 0);
     const discount = Math.round((goodsTotal - order.total) * 100) / 100;
 
