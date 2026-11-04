@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600" role="img" aria-label="专辑封面占位图 3">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4a2410"/>
+      <stop offset="1" stop-color="#160a04"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="32%" cy="26%" r="62%">
+      <stop offset="0" stop-color="#f59e0b" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#f59e0b" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="disc" cx="50%" cy="42%" r="55%">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.10"/>
+      <stop offset="1" stop-color="#000000" stop-opacity="0.55"/>
+    </radialGradient>
+    <filter id="soft"><feGaussianBlur stdDeviation="18"/></filter>
+  </defs>
+
+  <rect width="600" height="600" fill="url(#bg)"/>
+  <rect width="600" height="600" fill="url(#glow)"/>
+  <circle cx="180" cy="434" r="150" fill="#ffb454" fill-opacity="0.16" filter="url(#soft)"/>
+
+  <circle cx="300" cy="300" r="196" fill="#05050a" fill-opacity="0.55"/>
+  <circle cx="300" cy="300" r="196" fill="url(#disc)"/>
+  <circle cx="300" cy="300" r="140" fill="none" stroke="#ffb454" stroke-opacity="0.22" stroke-width="1.2"/>
+    <circle cx="300" cy="300" r="174" fill="none" stroke="#ffb454" stroke-opacity="0.16999999999999998" stroke-width="1.2"/>
+    <circle cx="300" cy="300" r="208" fill="none" stroke="#ffb454" stroke-opacity="0.12" stroke-width="1.2"/>
+  <circle cx="300" cy="300" r="16" fill="#ffb454" fill-opacity="0.9"/>
+  <circle cx="300" cy="300" r="5" fill="#05050a"/>
+
+  <circle cx="250.1" cy="409.1" r="1" fill="#ffb454" fill-opacity="0.5"/>
+    <circle cx="178.4" cy="400.9" r="2" fill="#ffb454" fill-opacity="0.42"/>
+    <circle cx="109.8" cy="347.3" r="3" fill="#ffb454" fill-opacity="0.33999999999999997"/>
+    <circle cx="70.9" cy="252.4" r="1" fill="#ffb454" fill-opacity="0.26"/>
+    <circle cx="84.1" cy="134.6" r="2" fill="#ffb454" fill-opacity="0.5"/>
+    <circle cx="245.8" cy="192.9" r="3" fill="#ffb454" fill-opacity="0.42"/>
+    <circle cx="296.9" cy="142.0" r="1" fill="#ffb454" fill-opacity="0.33999999999999997"/>
+    <circle cx="381.6" cy="121.8" r="2" fill="#ffb454" fill-opacity="0.26"/>
+    <circle cx="480.1" cy="150.5" r="3" fill="#ffb454" fill-opacity="0.5"/>
+    <circle cx="563.9" cy="234.3" r="1" fill="#ffb454" fill-opacity="0.42"/>
+    <circle cx="417.5" cy="324.4" r="2" fill="#ffb454" fill-opacity="0.33999999999999997"/>
+    <circle cx="425.4" cy="396.1" r="3" fill="#ffb454" fill-opacity="0.26"/>
+    <circle cx="388.5" cy="474.9" r="1" fill="#ffb454" fill-opacity="0.5"/>
+    <circle cx="304.6" cy="534.0" r="2" fill="#ffb454" fill-opacity="0.42"/>
+</svg>

@@ -8,6 +8,8 @@ import { fileURLToPath } from 'node:url';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const pages = ['index.html', 'orders.html', 'messages.html', 'profile.html'];
+// 只有商城页面使用 data.js / common.js；index.html 现在是独立的专辑页
+const shopPages = ['orders.html', 'messages.html', 'profile.html'];
 const attrPattern = /(?:href|src)\s*=\s*"([^"]+)"/g;
 
 let checked = 0;
@@ -44,12 +46,18 @@ for (const id of productIds) {
   }
 }
 
-// 每个页面都应引入数据层与公共脚本
-for (const page of pages) {
+// 商城页面都应引入数据层与公共脚本
+for (const page of shopPages) {
   const html = await readFile(join(root, page), 'utf8');
   for (const script of ['js/data.js', 'js/common.js']) {
     if (!html.includes(script)) missing.push(`${page} 缺少 ${script}`);
   }
+}
+
+// 专辑页应引入自己的数据与脚本
+const albumHtml = await readFile(join(root, 'index.html'), 'utf8');
+for (const script of ['js/albums.js', 'js/album.js', 'css/album.css']) {
+  if (!albumHtml.includes(script)) missing.push(`index.html 缺少 ${script}`);
 }
 
 if (missing.length) {

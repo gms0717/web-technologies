@@ -3,50 +3,77 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>首页 - 优选商城</title>
-  <meta name="description" content="优选商城 —— 纯 HTML + CSS + JavaScript 实现的前端练习作品，包含首页、订单、消息、我的四个页面。">
-  <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/pages.css">
+  <title>环绕专辑 · ALBUM RING</title>
+  <meta name="description" content="3D 环绕专辑展示：环形旋转，悬停暂停并以内侧边掀开，点击专辑查看曲目，点击歌曲即可播放，背景可随时更换。">
+  <link rel="stylesheet" href="css/album.css">
 </head>
 <body>
-  <!-- 头部由 js/common.js 统一渲染 -->
-  <header id="app-header"></header>
+  <!-- 背景双图层，切换时交叉淡入 -->
+  <div class="bg-layer" id="bgA"></div>
+  <div class="bg-layer is-on" id="bgB"></div>
 
-  <main>
-    <!-- 轮播 -->
-    <section class="home-hero">
-      <div class="container">
-        <div class="carousel" id="carousel" aria-roledescription="carousel" aria-label="促销海报">
-          <div class="carousel-track" id="carouselTrack"></div>
-          <div class="carousel-dots" id="carouselDots"></div>
-        </div>
-      </div>
-    </section>
-
-    <div class="container">
-      <!-- 分类快捷入口 -->
-      <nav class="cat-row" id="catRow" aria-label="商品分类"></nav>
-
-      <!-- 商品列表 -->
-      <section class="panel" id="goods">
-        <div class="section-head">
-          <h2 class="section-title">猜你喜欢</h2>
-          <span class="section-sub" id="goodsHint">全部商品</span>
-          <button type="button" class="section-more" id="clearFilter" hidden>清除筛选</button>
-        </div>
-        <div class="goods-grid" id="goodsGrid"></div>
-        <div class="load-more" id="loadMoreBox" hidden>
-          <button class="btn btn-ghost" id="loadMore" type="button">查看更多商品</button>
-        </div>
-      </section>
+  <header class="hud">
+    <div class="brand">
+      <p class="kicker">ALBUM RING</p>
+      <h1>环绕专辑</h1>
+      <p class="hint">悬停暂停并翻开 · 点击专辑查看曲目 · 点击歌曲播放</p>
     </div>
+
+    <div class="bg-switch" id="bgSwitch" role="group" aria-label="更换背景">
+      <label class="bg-upload" title="上传自己的背景图">
+        <input type="file" id="bgFile" accept="image/*" hidden>
+        <span aria-hidden="true">＋</span>
+        <span class="sr-only">上传背景图</span>
+      </label>
+    </div>
+  </header>
+
+  <main class="stage">
+    <div class="ring" id="ring" aria-label="专辑列表"></div>
   </main>
 
-  <footer id="app-footer"></footer>
+  <!-- 专辑详情：点击专辑后放大显示 -->
+  <section class="album-view" id="albumView" hidden aria-hidden="true">
+    <div class="view-backdrop" data-close></div>
+    <div class="view-panel" role="dialog" aria-modal="true" aria-labelledby="viewTitle" tabindex="-1">
+      <button class="view-close" id="viewClose" type="button" data-close aria-label="关闭">✕</button>
+      <div class="view-cover"><img id="viewCover" alt=""></div>
+      <div class="view-info">
+        <p class="view-kicker">ALBUM</p>
+        <h2 class="view-title" id="viewTitle"></h2>
+        <p class="view-sub" id="viewSub"></p>
+        <div class="view-actions">
+          <button class="play-album" id="playAlbum" type="button">▶ 播放整张</button>
+        </div>
+        <ul class="track-list" id="trackList"></ul>
+      </div>
+    </div>
+  </section>
 
-  <script src="js/data.js"></script>
-  <script src="js/common.js"></script>
-  <script src="js/home.js"></script>
+  <!-- 底部播放器 -->
+  <footer class="player" id="player" hidden>
+    <img class="player-cover" id="playerCover" alt="">
+    <div class="player-text">
+      <p class="player-title" id="playerTitle">—</p>
+      <p class="player-sub"><span id="playerSub"></span> <span class="player-tag" id="playerTag">演示音频</span></p>
+    </div>
+    <div class="player-controls">
+      <button class="ctrl" id="prevBtn" type="button" aria-label="上一首">⏮</button>
+      <button class="ctrl is-main" id="playBtn" type="button" aria-label="播放">▶</button>
+      <button class="ctrl" id="nextBtn" type="button" aria-label="下一首">⏭</button>
+    </div>
+    <div class="player-progress">
+      <div class="progress" id="progress" role="slider" aria-label="播放进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
+        <span id="progressFill"></span>
+      </div>
+      <div class="progress-time"><span id="curTime">0:00</span><span>/</span><span id="totalTime">0:00</span></div>
+    </div>
+  </footer>
+
+  <!-- 新增专辑：低调的小圆按钮 -->
+  <button class="fab" id="addAlbum" type="button" aria-label="新增专辑" title="新增专辑">＋</button>
+
+  <script src="js/albums.js"></script>
+  <script src="js/album.js"></script>
 </body>
 </html>
