@@ -52,6 +52,7 @@
   let activeIndex = -1;
   let lastFocus = null;
   let closeTimer = null;
+  let spinAnim = null;
   const current = { album: -1, track: -1 };
 
   const escapeHtml = (value) =>
@@ -150,17 +151,26 @@
         <button class="album-remove" type="button" aria-label="删除专辑 ${escapeHtml(album.title)}">✕</button>
       `;
 
-      // 悬停停止旋转（计数避免在专辑之间移动时闪跳）
-      card.addEventListener('mouseenter', () => { hoverCount += 1; syncPause(); });
-      card.addEventListener('mouseleave', () => { hoverCount = Math.max(0, hoverCount - 1); syncPause(); });
+      // 悬停停止旋转（计数避免在专辑之间移动时闪跳）；背面的专辑不参与
+      card.addEventListener('mouseenter', () => {
+        if (card.classList.contains('is-back')) return;
+        hoverCount += 1;
+        syncPause();
+      });
+      card.addEventListener('mouseleave', () => {
+        hoverCount = Math.max(0, hoverCount - 1);
+        syncPause();
+      });
 
       card.addEventListener('click', (event) => {
         if (event.target.closest('.album-remove')) return;
+        if (card.classList.contains('is-back')) return; // 背面的专辑不响应点击
         openView(index, card);
       });
       card.addEventListener('keydown', (event) => {
         if (event.target !== card) return;
         if (event.key !== 'Enter' && event.key !== ' ') return;
+        if (card.classList.contains('is-back')) return;
         event.preventDefault();
         openView(index, card);
       });
@@ -180,8 +190,11 @@
 
   /** 读取环形 CSS 动画当前转到的角度（暂停时也会冻结在当前位置） */
   function currentRotation() {
-    const anim = ring.getAnimations()[0];
-    const time = anim && anim.currentTime ? Number(anim.currentTime) : 0;
+    // 缓存动画对象，避免每 90ms 都新建一次数组
+    if (!spinAnim || spinAnim.playState === 'idle') {
+      spinAnim = ring.getAnimations()[0] || null;
+    }
+    const time = spinAnim && spinAnim.currentTime ? Number(spinAnim.currentTime) : 0;
     return (((time % SPIN_MS) / SPIN_MS) * 360) % 360;
   }
 
