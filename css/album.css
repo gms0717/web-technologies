@@ -405,54 +405,76 @@ body::after {
 .view-panel {
   position: relative;
   z-index: 1;
-  display: grid;
-  grid-template-columns: 340px 1fr;
-  gap: 40px;
-  width: min(980px, calc(100vw - 120px));
-  padding: 36px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  width: min(660px, 78vmin);
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 24px;
-  background: linear-gradient(160deg, rgba(30, 32, 42, 0.94), rgba(11, 12, 17, 0.96));
-  box-shadow: 0 44px 100px rgba(0, 0, 0, 0.65);
-  transform: translateY(8px) scale(0.99);
-  transition: transform 0.32s cubic-bezier(0.22, 0.61, 0.36, 1);
+  background: #0c0d12;
+  box-shadow: 0 44px 110px rgba(0, 0, 0, 0.72);
 }
 .view-panel:focus { outline: none; }
-.album-view.is-open .view-panel { transform: none; }
+
+/* 背景就是专辑封面本身：轻微虚化 + 下部压暗，保证文字能看清 */
+.view-bg {
+  position: absolute;
+  inset: -40px;
+  background: #0c0d12 center / cover no-repeat;
+  filter: blur(9px) brightness(0.85) saturate(1.2);
+  transform: scale(1.04);
+  pointer-events: none;
+}
+.view-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(6, 7, 10, 0.22) 0%,
+    rgba(6, 7, 10, 0.42) 30%,
+    rgba(6, 7, 10, 0.74) 66%,
+    rgba(6, 7, 10, 0.9) 100%
+  );
+  pointer-events: none;
+}
 
 .view-close {
   position: absolute;
-  top: 18px;
-  right: 18px;
+  top: 16px;
+  right: 16px;
+  z-index: 3;
   display: grid;
   place-items: center;
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--muted);
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
   font-size: 15px;
   transition: background-color 0.2s, color 0.2s;
 }
-.view-close:hover { background: rgba(255, 255, 255, 0.16); color: #fff; }
+.view-close:hover { background: rgba(255, 255, 255, 0.2); color: #fff; }
 
-.view-cover {
-  width: 340px;
-  aspect-ratio: 1;
-  border-radius: 18px;
-  overflow: hidden;
-  background: #0b0d14;
-  box-shadow: 0 26px 60px rgba(0, 0, 0, 0.6);
-  will-change: transform;
+.view-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  padding: 32px 34px 24px;
 }
-.view-cover img { width: 100%; height: 100%; object-fit: cover; }
 
-.view-info { display: flex; flex-direction: column; min-width: 0; padding: 6px 0; }
-.view-kicker { color: var(--accent); font-size: 11px; letter-spacing: 4px; }
-.view-title { margin-top: 10px; font-size: 30px; font-weight: 700; letter-spacing: 1px; }
-.view-sub { margin-top: 8px; color: var(--muted); font-size: 13px; }
-
-.view-actions { display: flex; align-items: center; gap: 12px; margin: 22px 0 8px; }
+.view-title {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  line-height: 1.2;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.55);
+}
+.view-sub { margin-top: 8px; color: rgba(255, 255, 255, 0.62); font-size: 13px; }
+.view-actions { display: flex; align-items: center; gap: 12px; margin: 18px 0 2px; }
 .play-album {
   display: inline-flex;
   align-items: center;
@@ -470,7 +492,25 @@ body::after {
 .play-album:active { transform: translateY(1px); }
 
 /* ---------------- 曲目列表 ---------------- */
-.track-list { display: flex; flex-direction: column; gap: 2px; margin-top: 8px; list-style: none; }
+.track-list {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 0;
+  margin-top: 14px;
+  padding-right: 4px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  list-style: none;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+}
+.track-list::-webkit-scrollbar { width: 6px; }
+.track-list::-webkit-scrollbar-thumb {
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.18);
+}
 .track {
   display: grid;
   grid-template-columns: 30px minmax(0, 1fr) 18px 44px;
@@ -479,11 +519,12 @@ body::after {
   width: 100%;
   padding: 9px 12px;
   border-radius: 10px;
-  color: rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.82);
   text-align: left;
   transition: background-color 0.18s, color 0.18s;
 }
-.track:hover { background: rgba(255, 255, 255, 0.06); color: #fff; }
+.track:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
 .track-index { color: var(--faint); font-size: 12px; font-variant-numeric: tabular-nums; }
 .track-name { overflow: hidden; font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
 .track-time { color: var(--faint); font-size: 12px; text-align: right; font-variant-numeric: tabular-nums; }
@@ -618,8 +659,8 @@ body::after {
 /* ---------------- 响应式（桌面优先，窄屏只做缩放） ---------------- */
 @media (max-width: 1180px) {
   .ring { --radius: 320px; --card: 184px; }
-  .view-panel { grid-template-columns: 300px 1fr; gap: 28px; padding: 28px; }
-  .view-cover { width: 300px; }
+  .view-content { padding: 26px 26px 20px; }
+  .view-title { font-size: 26px; }
   .player-text { width: 140px; }
 }
 

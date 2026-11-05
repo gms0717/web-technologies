@@ -1,4 +1,4 @@
-﻿/* =========================================================
+/* =========================================================
    album.js — 环绕专辑交互
    环形旋转 / 悬停暂停并翻开 / 增删专辑与曲目 / 播放器 / 背景切换
    ========================================================= */
@@ -15,7 +15,7 @@
   const addAlbumBtn = document.getElementById('addAlbum');
 
   const view = document.getElementById('albumView');
-  const viewCover = document.getElementById('viewCover');
+  const viewBg = document.getElementById('viewBg');
   const viewTitle = document.getElementById('viewTitle');
   const viewSub = document.getElementById('viewSub');
   const trackList = document.getElementById('trackList');
@@ -36,6 +36,8 @@
 
   const audio = new Audio();
   audio.preload = 'auto';
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   const cards = [];
   let albums = loadAlbums();
@@ -363,8 +365,7 @@
     lastFocus = cardEl;
 
     document.documentElement.style.setProperty('--accent', album.accent || DEFAULT_ACCENT);
-    viewCover.src = album.cover;
-    viewCover.alt = `${album.title} 封面`;
+    viewBg.style.backgroundImage = `url("${album.cover}")`;
     viewTitle.textContent = album.title;
     updateViewSub(index);
 
@@ -375,7 +376,7 @@
     view.setAttribute('aria-hidden', 'false');
     void view.offsetWidth; // 强制回流，保证淡入过渡生效（不依赖 rAF）
     view.classList.add('is-open');
-    flipCover(cardEl);
+    expandFromCard(cardEl);
 
     const panel = view.querySelector('.view-panel');
     if (panel) panel.focus({ preventScroll: true });
@@ -387,20 +388,24 @@
     viewSub.textContent = `${album.sub} · ${album.year} · 共 ${album.tracks.length} 首`;
   }
 
-  /** 让大封面从被点击的专辑位置“飞”到详情里 */
-  function flipCover(cardEl) {
+  /** 正方形详情从被点击的专辑位置展开过去 */
+  function expandFromCard(cardEl) {
+    const panel = view.querySelector('.view-panel');
+    if (!panel) return;
+    if (reduceMotion.matches) return; // 系统开启“减少动态效果”时不播动画
+
     const from = cardEl.getBoundingClientRect();
-    const to = viewCover.getBoundingClientRect();
+    const to = panel.getBoundingClientRect();
     if (!to.width || !from.width) return;
 
     const scale = from.width / to.width;
     const dx = from.left + from.width / 2 - (to.left + to.width / 2);
     const dy = from.top + from.height / 2 - (to.top + to.height / 2);
 
-    viewCover.animate([
-      { transform: `translate(${dx}px, ${dy}px) scale(${scale})`, opacity: 0.5 },
+    panel.animate([
+      { transform: `translate(${dx}px, ${dy}px) scale(${scale})`, opacity: 0.25 },
       { transform: 'none', opacity: 1 },
-    ], { duration: 460, easing: 'cubic-bezier(.22,.61,.36,1)' });
+    ], { duration: 420, easing: 'cubic-bezier(.22,.61,.36,1)' });
   }
 
   function closeView() {

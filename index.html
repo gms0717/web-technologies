@@ -32,14 +32,15 @@
     <div class="ring" id="ring" aria-label="专辑列表"></div>
   </main>
 
-  <!-- 专辑详情：点击专辑后放大显示 -->
+  <!-- 专辑详情：正方形，背景是专辑封面本身，专辑名在左上角 -->
   <section class="album-view" id="albumView" hidden aria-hidden="true">
     <div class="view-backdrop" data-close></div>
     <div class="view-panel" role="dialog" aria-modal="true" aria-labelledby="viewTitle" tabindex="-1">
+      <div class="view-bg" id="viewBg" aria-hidden="true"></div>
+      <div class="view-shade" aria-hidden="true"></div>
       <button class="view-close" id="viewClose" type="button" data-close aria-label="关闭">✕</button>
-      <div class="view-cover"><img id="viewCover" alt=""></div>
-      <div class="view-info">
-        <p class="view-kicker">ALBUM</p>
+
+      <div class="view-content">
         <h2 class="view-title" id="viewTitle"></h2>
         <p class="view-sub" id="viewSub"></p>
         <div class="view-actions">
