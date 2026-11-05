@@ -1,7 +1,12 @@
 /**
  * 生成专辑页的占位素材：
- *  - images/albums/1..6.svg  抽象封面（后续可直接替换成真实图片）
+ *  - images/albums/1..6.svg  抽象封面源文件（后续可直接替换成真实图片）
  *  - audio/placeholder.wav   4 秒柔和和弦，用于演示播放器（后续可替换成真实音频）
+ *
+ * 注意：页面实际加载的是 images/albums/1..6.jpg（位图）。
+ * 3D 旋转时 SVG 会被逐帧重新栅格化，实测会掉到 30fps；
+ * 改成 800×800 的 JPEG 之后 30 秒采样稳定 60fps。
+ * 需要重新生成位图时：先用无头浏览器把 SVG 截成 800×800 PNG，再转成 JPEG。
  *
  * 用法: node tools/gen-albums.mjs
  */

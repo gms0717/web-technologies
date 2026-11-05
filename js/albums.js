@@ -1,4 +1,4 @@
-/* =========================================================
+﻿/* =========================================================
    albums.js — 专辑数据
    替换真实内容时只需要改这里：
    - cover 指向 images/albums/ 下的图片
@@ -11,7 +11,7 @@ window.ALBUMS = [
     sub: '合成器浪潮',
     year: 2024,
     accent: '#ff4fa3',
-    cover: 'images/albums/1.svg',
+    cover: 'images/albums/1.jpg',
     tracks: [
       { title: 'Neon Highway', duration: '3:42' },
       { title: 'Chrome Hearts', duration: '4:05' },
@@ -26,7 +26,7 @@ window.ALBUMS = [
     sub: '氛围电子',
     year: 2023,
     accent: '#38e1ff',
-    cover: 'images/albums/2.svg',
+    cover: 'images/albums/2.jpg',
     tracks: [
       { title: 'Tidal Drift', duration: '5:12' },
       { title: 'Blue Hour', duration: '4:38' },
@@ -41,7 +41,7 @@ window.ALBUMS = [
     sub: '独立民谣',
     year: 2022,
     accent: '#ffb454',
-    cover: 'images/albums/3.svg',
+    cover: 'images/albums/3.jpg',
     tracks: [
       { title: 'Amber Fields', duration: '3:34' },
       { title: 'Paper Lanterns', duration: '4:02' },
@@ -56,7 +56,7 @@ window.ALBUMS = [
     sub: '都市节拍',
     year: 2024,
     accent: '#a3e635',
-    cover: 'images/albums/4.svg',
+    cover: 'images/albums/4.jpg',
     tracks: [
       { title: 'Concrete Beat', duration: '3:28' },
       { title: 'Crosswalk', duration: '2:58' },
@@ -71,7 +71,7 @@ window.ALBUMS = [
     sub: '太空环境音',
     year: 2021,
     accent: '#9db4ff',
-    cover: 'images/albums/5.svg',
+    cover: 'images/albums/5.jpg',
     tracks: [
       { title: 'Orbit', duration: '5:48' },
       { title: 'Solar Wind', duration: '6:22' },
@@ -86,7 +86,7 @@ window.ALBUMS = [
     sub: '深夜爵士',
     year: 2020,
     accent: '#c084fc',
-    cover: 'images/albums/6.svg',
+    cover: 'images/albums/6.jpg',
     tracks: [
       { title: 'Blue Lantern', duration: '4:26' },
       { title: 'Smoke & Brass', duration: '3:58' },
@@ -99,3 +99,4 @@ window.ALBUMS = [
 
 /** 没有真实音频时使用的 4 秒演示音频 */
 window.PLACEHOLDER_AUDIO = 'audio/placeholder.wav';
+

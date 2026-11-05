@@ -61,12 +61,22 @@
     }[ch]));
 
   /* ---------------- 数据存取 ---------------- */
+  /** 旧数据里指向 SVG 占位封面的一律换成位图（3D 旋转时位图才不卡） */
+  function normalizeCover(cover) {
+    return String(cover || '').replace(
+      /^images\/albums\/([1-6])\.svg$/,
+      'images/albums/$1.jpg'
+    );
+  }
+
   function loadAlbums() {
     try {
       const raw = localStorage.getItem(STORE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed) && parsed.length) return parsed;
+        if (Array.isArray(parsed) && parsed.length) {
+          return parsed.map((album) => ({ ...album, cover: normalizeCover(album.cover) }));
+        }
       }
     } catch (err) {
       /* 数据损坏时回落到默认专辑 */
@@ -74,6 +84,7 @@
 
     return (window.ALBUMS || []).map((album) => ({
       ...album,
+      cover: normalizeCover(album.cover),
       tracks: album.tracks.map((track) => ({ ...track })),
     }));
   }
@@ -347,7 +358,7 @@
         sub,
         year: new Date().getFullYear(),
         accent: ACCENTS[albums.length % ACCENTS.length],
-        cover: cover || `images/albums/${(albums.length % 6) + 1}.svg`,
+        cover: cover || `images/albums/${(albums.length % 6) + 1}.jpg`,
         tracks: [],
       });
 
