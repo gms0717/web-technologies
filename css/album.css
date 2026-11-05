@@ -295,13 +295,19 @@ body::after {
   margin-top: 4px;
   padding: 10px 12px;
   border-radius: 10px;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.72);
   font-size: 13px;
   text-align: left;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.85);
   transition: color 0.2s, background-color 0.2s;
 }
-.track-add:hover { color: #fff; background: rgba(255, 255, 255, 0.05); }
-.track-empty { padding: 10px 12px; color: rgba(255, 255, 255, 0.35); font-size: 13px; }
+.track-add:hover { color: #fff; background: rgba(8, 9, 13, 0.55); }
+.track-empty {
+  padding: 10px 12px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.85);
+}
 
 /* 轻提示 */
 .toast {
@@ -417,25 +423,11 @@ body::after {
 }
 .view-panel:focus { outline: none; }
 
-/* 背景就是专辑封面本身：轻微虚化 + 下部压暗，保证文字能看清 */
+/* 背景就是专辑封面本身，不加任何遮罩，原图全透明地铺满 */
 .view-bg {
   position: absolute;
-  inset: -40px;
-  background: #0c0d12 center / cover no-repeat;
-  filter: blur(9px) brightness(0.85) saturate(1.2);
-  transform: scale(1.04);
-  pointer-events: none;
-}
-.view-shade {
-  position: absolute;
   inset: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(6, 7, 10, 0.22) 0%,
-    rgba(6, 7, 10, 0.42) 30%,
-    rgba(6, 7, 10, 0.74) 66%,
-    rgba(6, 7, 10, 0.9) 100%
-  );
+  background: #0c0d12 center / cover no-repeat;
   pointer-events: none;
 }
 
@@ -449,12 +441,13 @@ body::after {
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.7);
+  background: rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(8px);
+  color: rgba(255, 255, 255, 0.85);
   font-size: 15px;
   transition: background-color 0.2s, color 0.2s;
 }
-.view-close:hover { background: rgba(255, 255, 255, 0.2); color: #fff; }
+.view-close:hover { background: rgba(0, 0, 0, 0.62); color: #fff; }
 
 .view-content {
   position: relative;
@@ -471,9 +464,14 @@ body::after {
   font-weight: 700;
   letter-spacing: 1px;
   line-height: 1.2;
-  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.55);
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.85), 0 1px 3px rgba(0, 0, 0, 0.7);
 }
-.view-sub { margin-top: 8px; color: rgba(255, 255, 255, 0.62); font-size: 13px; }
+.view-sub {
+  margin-top: 8px;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 13px;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.85);
+}
 .view-actions { display: flex; align-items: center; gap: 12px; margin: 18px 0 2px; }
 .play-album {
   display: inline-flex;
@@ -519,12 +517,13 @@ body::after {
   width: 100%;
   padding: 9px 12px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.82);
+  background: rgba(8, 9, 13, 0.58);
+  backdrop-filter: blur(10px);
+  color: rgba(255, 255, 255, 0.9);
   text-align: left;
   transition: background-color 0.18s, color 0.18s;
 }
-.track:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
+.track:hover { background: rgba(8, 9, 13, 0.78); color: #fff; }
 .track-index { color: var(--faint); font-size: 12px; font-variant-numeric: tabular-nums; }
 .track-name { overflow: hidden; font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
 .track-time { color: var(--faint); font-size: 12px; text-align: right; font-variant-numeric: tabular-nums; }
@@ -543,7 +542,7 @@ body::after {
   0%, 100% { height: 4px; }
   50% { height: 14px; }
 }
-.track.is-current { background: rgba(255, 255, 255, 0.09); color: #fff; }
+.track.is-current { background: rgba(8, 9, 13, 0.78); color: #fff; }
 .track.is-current .track-index { color: var(--accent); }
 .track.is-current .track-eq { display: inline-flex; }
 .track.is-paused .track-eq i { animation-play-state: paused; }
