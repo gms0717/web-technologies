@@ -28,6 +28,20 @@
     </div>
   </header>
 
+  <!-- 斜向图片轮播：左下一列向上滚，右上一列向下滚，压在专辑环下面 -->
+  <section class="marquees" aria-hidden="true">
+    <div class="marquee marquee--left">
+      <div class="marquee-track" id="marqueeLeft"></div>
+    </div>
+    <div class="marquee marquee--right">
+      <div class="marquee-track" id="marqueeRight"></div>
+    </div>
+  </section>
+
+  <button class="marquee-add marquee-add--left" type="button" aria-label="添加轮播图" title="添加轮播图">＋</button>
+  <button class="marquee-add marquee-add--right" type="button" aria-label="添加轮播图" title="添加轮播图">＋</button>
+  <input type="file" id="bannerFile" accept="image/*" hidden>
+
   <main class="stage">
     <div class="ring ring--outer" id="ringOuter" aria-label="外圈专辑"></div>
     <div class="ring ring--inner" id="ringInner" aria-label="内圈专辑"></div>

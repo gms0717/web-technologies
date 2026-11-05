@@ -1091,6 +1091,140 @@
     }
   });
 
+  /* ---------------- 斜向图片轮播 ---------------- */
+  const BANNERS_KEY = 'album_banners';
+  const DEFAULT_BANNERS = [1, 2, 3, 4, 5, 6].map((n) => `images/banners/${n}.jpg`);
+  const marqueeTracks = [document.getElementById('marqueeLeft'), document.getElementById('marqueeRight')];
+
+  function loadBanners() {
+    try {
+      const raw = localStorage.getItem(BANNERS_KEY);
+      if (raw) {
+        const list = JSON.parse(raw);
+        if (Array.isArray(list) && list.length) return list;
+      }
+    } catch (err) {
+      /* 数据损坏就用默认图 */
+    }
+    return DEFAULT_BANNERS.slice();
+  }
+
+  let banners = loadBanners();
+
+  function saveBanners() {
+    try {
+      localStorage.setItem(BANNERS_KEY, JSON.stringify(banners));
+      return true;
+    } catch (err) {
+      toast('保存失败：本地存储空间可能已满');
+      return false;
+    }
+  }
+
+  function renderMarquees() {
+    const count = banners.length;
+
+    marqueeTracks.forEach((track, column) => {
+      if (!track) return;
+
+      if (!count) {
+        track.innerHTML = '';
+        return;
+      }
+
+      // 右列错开两张，两列不会同步
+      const order = banners.map((_, index) => index);
+      const rotated = column === 1 && count > 2 ? [...order.slice(2), ...order.slice(0, 2)] : order;
+
+      const item = (index) => `
+        <figure class="marquee-item" data-index="${index}">
+          <img src="${banners[index]}" alt="" draggable="false">
+          <button class="marquee-remove" type="button" aria-label="移除这张轮播图">✕</button>
+        </figure>`;
+
+      // 内容放两遍，translateY(-50%) 就能无缝衔接
+      track.innerHTML = [...rotated.map(item), ...rotated.map(item)].join('');
+    });
+  }
+
+  marqueeTracks.forEach((track) => {
+    if (!track) return;
+    track.addEventListener('click', (event) => {
+      const btn = event.target.closest('.marquee-remove');
+      if (!btn) return;
+
+      const figure = btn.closest('.marquee-item');
+      const index = Number(figure && figure.dataset.index);
+      if (!Number.isInteger(index) || index < 0 || index >= banners.length) return;
+
+      banners.splice(index, 1);
+      saveBanners();
+      renderMarquees();
+      toast('已移除轮播图');
+    });
+  });
+
+  /** 把图片裁成 16:9、缩到 480×270，尽量少占空间 */
+  function fileToBanner(file) {
+    return new Promise((resolve, reject) => {
+      const image = new Image();
+      const url = URL.createObjectURL(file);
+
+      image.onload = () => {
+        const width = 480;
+        const height = 270;
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+
+        const scale = Math.max(width / image.width, height / image.height);
+        const drawW = image.width * scale;
+        const drawH = image.height * scale;
+
+        canvas.getContext('2d').drawImage(
+          image,
+          (width - drawW) / 2,
+          (height - drawH) / 2,
+          drawW,
+          drawH
+        );
+
+        URL.revokeObjectURL(url);
+        resolve(canvas.toDataURL('image/jpeg', 0.82));
+      };
+      image.onerror = () => {
+        URL.revokeObjectURL(url);
+        reject(new Error('图片读取失败'));
+      };
+      image.src = url;
+    });
+  }
+
+  const bannerFile = document.getElementById('bannerFile');
+  document.querySelectorAll('.marquee-add').forEach((btn) => {
+    btn.addEventListener('click', () => bannerFile.click());
+  });
+
+  bannerFile.addEventListener('change', async () => {
+    const file = bannerFile.files && bannerFile.files[0];
+    if (!file) return;
+
+    const dataUrl = await fileToBanner(file).catch(() => null);
+    bannerFile.value = '';
+    if (!dataUrl) {
+      toast('图片读取失败');
+      return;
+    }
+
+    banners.push(dataUrl);
+    if (!saveBanners()) {
+      banners.pop();
+      return;
+    }
+    renderMarquees();
+    toast('已添加轮播图（16:9）');
+  });
+
   /* ---------------- 启动 ---------------- */
   fab.addEventListener('click', (event) => {
     const btn = event.target.closest('.fab-btn');
@@ -1102,6 +1236,7 @@
   });
   restoreBackground();
   renderRings();
+  renderMarquees();
 })();
 
 

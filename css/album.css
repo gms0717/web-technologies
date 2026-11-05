@@ -1,4 +1,4 @@
-/* =========================================================
+﻿/* =========================================================
    album.css — 环绕专辑页
    背景层 / HUD / 书页式专辑堆 / 专辑详情 / 曲目 / 播放器
    ========================================================= */
@@ -131,6 +131,126 @@ body::after {
 }
 .bg-upload:hover { border-color: #fff; color: #fff; }
 
+/* ---------------- 斜向图片轮播（在专辑环下面、背景上面） ---------------- */
+.marquees {
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.marquee {
+  position: absolute;
+  width: 240px;
+  height: 540px;
+  overflow: hidden;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 12%, #000 88%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0%, #000 12%, #000 88%, transparent 100%);
+}
+
+/* 左下一列：斜 45°，内容向上走；窗口贴在左下角 */
+.marquee--left {
+  left: -30px;
+  bottom: -40px;
+  transform: rotate(45deg);
+  transform-origin: left bottom;
+}
+.marquee--left .marquee-track { animation: marquee-up 48s linear infinite; }
+
+/* 右上一列：斜 45°，内容向下走；窗口贴在右上角 */
+.marquee--right {
+  right: -30px;
+  top: -40px;
+  transform: rotate(45deg);
+  transform-origin: right top;
+}
+.marquee--right .marquee-track { animation: marquee-down 62s linear infinite; }
+
+.marquee-track {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 9px;
+  will-change: transform;
+}
+.marquee:hover .marquee-track { animation-play-state: paused; }
+
+@keyframes marquee-up {
+  from { transform: translateY(0); }
+  to { transform: translateY(-50%); }
+}
+@keyframes marquee-down {
+  from { transform: translateY(-50%); }
+  to { transform: translateY(0); }
+}
+
+/* 16:9 的图片条 */
+.marquee-item {
+  position: relative;
+  width: 222px;
+  aspect-ratio: 16 / 9;
+  flex: 0 0 auto;
+  overflow: hidden;
+  border-radius: 10px;
+  background: rgba(10, 12, 18, 0.6);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45);
+  opacity: 0.42;
+  transition: opacity 0.3s;
+}
+.marquee:hover .marquee-item { opacity: 0.9; }
+.marquee-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* 单张的删除：悬停才出现 */
+.marquee-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(8, 9, 13, 0.7);
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 10px;
+  line-height: 1;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, background-color 0.2s;
+}
+.marquee-item:hover .marquee-remove { opacity: 1; pointer-events: auto; }
+.marquee-remove:hover { background: rgba(232, 69, 60, 0.9); color: #fff; }
+
+/* 每列一个低调的“＋”，点它从电脑里加图 */
+.marquee-add {
+  position: fixed;
+  z-index: 6;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 15px;
+  line-height: 1;
+  opacity: 0.5;
+  pointer-events: auto;
+  transition: opacity 0.2s, background-color 0.2s, color 0.2s;
+}
+.marquee-add:hover { opacity: 1; background: rgba(255, 255, 255, 0.1); color: #fff; }
+.marquee-add--left { left: 26px; bottom: 26px; }
+.marquee-add--right { right: 26px; top: 118px; }
+
 /* ---------------- 舞台 ---------------- */
 .stage {
   position: relative;
@@ -142,30 +262,33 @@ body::after {
   perspective-origin: 50% 48%;
 }
 
-/* 双层专辑环：外圈正向、内圈反向，各自独立旋转 */
+/* 双层专辑环：外圈正向、内圈反向，各自独立旋转；小圈在上、大圈在下，约五分之一重叠 */
 .ring {
   --radius: 430px;
   --card: 200px;
+  --shift: 0px;
   grid-area: 1 / 1;
   position: relative;
   width: 0;
   height: 0;
   transform-style: preserve-3d;
-  transform: rotateX(-8deg);
+  transform: translateY(var(--shift, 0px)) rotateX(-8deg);
   will-change: transform;
 }
 
 .ring--outer {
+  --shift: 54px;
   animation: ring-spin 62s linear infinite;
 }
 
 .ring--inner {
+  --shift: -150px;
   animation: ring-spin 46s linear infinite reverse;
 }
 
 @keyframes ring-spin {
-  from { transform: rotateX(-8deg) rotateY(0deg); }
-  to { transform: rotateX(-8deg) rotateY(360deg); }
+  from { transform: translateY(var(--shift, 0px)) rotateX(-8deg) rotateY(0deg); }
+  to { transform: translateY(var(--shift, 0px)) rotateX(-8deg) rotateY(360deg); }
 }
 
 /* 悬停某张专辑时只暂停它所在的那一圈；打开详情时两圈都停 */
@@ -734,6 +857,7 @@ body::after {
   /* 环形仍保持旋转，但放慢到 1/4；否则会被压成 0.01ms 变成闪烁 */
   .ring { animation-duration: 205.6s !important; }
 }
+
 
 
 
