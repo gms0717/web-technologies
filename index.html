@@ -16,7 +16,7 @@
     <div class="brand">
       <p class="kicker">ALBUM RING</p>
       <h1>环绕专辑</h1>
-      <p class="hint">悬停暂停并翻开 · 点击专辑查看曲目 · 点击歌曲播放</p>
+      <p class="hint">内外两圈反向旋转 · 悬停暂停并翻开 · 点击专辑查看曲目</p>
     </div>
 
     <div class="bg-switch" id="bgSwitch" role="group" aria-label="更换背景">
@@ -29,7 +29,8 @@
   </header>
 
   <main class="stage">
-    <div class="ring" id="ring" aria-label="专辑列表"></div>
+    <div class="ring ring--outer" id="ringOuter" aria-label="外圈专辑"></div>
+    <div class="ring ring--inner" id="ringInner" aria-label="内圈专辑"></div>
   </main>
 
   <!-- 专辑详情：正方形，背景是专辑封面本身，专辑名在左上角 -->
@@ -70,8 +71,14 @@
     </div>
   </footer>
 
-  <!-- 新增专辑：低调的小圆按钮 -->
-  <button class="fab" id="addAlbum" type="button" aria-label="新增专辑" title="新增专辑">＋</button>
+  <!-- 新增专辑：平时是一颗小圆点，悬停展开成方形，分内外圈两个按钮 -->
+  <div class="fab" id="fab">
+    <span class="fab-plus" aria-hidden="true">＋</span>
+    <div class="fab-actions">
+      <button class="fab-btn" type="button" data-ring="outer" title="新增外圈专辑">外圈</button>
+      <button class="fab-btn" type="button" data-ring="inner" title="新增内圈专辑">内圈</button>
+    </div>
+  </div>
 
   <script src="js/albums.js"></script>
   <script src="js/album.js"></script>

@@ -142,18 +142,25 @@ body::after {
   perspective-origin: 50% 48%;
 }
 
-/* 环形专辑：整圈缓慢旋转，每张正对圆心（转到正面时正对用户） */
+/* 双层专辑环：外圈正向、内圈反向，各自独立旋转 */
 .ring {
-  --radius: 380px;
-  --card: 210px;
+  --radius: 430px;
+  --card: 200px;
+  grid-area: 1 / 1;
   position: relative;
   width: 0;
   height: 0;
   transform-style: preserve-3d;
   transform: rotateX(-8deg);
   will-change: transform;
-  /* 交给合成线程匀速转，不经过 JS，不会掉帧 */
-  animation: ring-spin 51.4s linear infinite;
+}
+
+.ring--outer {
+  animation: ring-spin 62s linear infinite;
+}
+
+.ring--inner {
+  animation: ring-spin 46s linear infinite reverse;
 }
 
 @keyframes ring-spin {
@@ -161,7 +168,7 @@ body::after {
   to { transform: rotateX(-8deg) rotateY(360deg); }
 }
 
-/* 悬停专辑或打开详情时暂停：只改播放状态，不重置角度 */
+/* 悬停某张专辑时只暂停它所在的那一圈；打开详情时两圈都停 */
 .ring.is-paused { animation-play-state: paused; }
 
 .album {
@@ -227,7 +234,7 @@ body::after {
 .album-meta em { color: rgba(255, 255, 255, 0.62); font-size: 11px; font-style: normal; }
 
 /* ---------------- 增删专辑 / 曲目的低调入口 ---------------- */
-/* 新增专辑：右下角小圆按钮，平时半透明 */
+/* 新增专辑：平时是小圆点，悬停展开成圆角方形，里面是内外圈两个按钮 */
 .fab {
   position: fixed;
   right: 34px;
@@ -235,23 +242,68 @@ body::after {
   z-index: 45;
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
+  overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.05);
   color: rgba(255, 255, 255, 0.55);
+  opacity: 0.6;
+  transition:
+    width 0.28s cubic-bezier(0.22, 0.61, 0.36, 1),
+    height 0.28s cubic-bezier(0.22, 0.61, 0.36, 1),
+    border-radius 0.28s cubic-bezier(0.22, 0.61, 0.36, 1),
+    opacity 0.2s,
+    background-color 0.25s,
+    border-color 0.25s;
+}
+.fab-plus {
   font-size: 20px;
   line-height: 1;
-  opacity: 0.55;
-  transition: opacity 0.2s, background-color 0.2s, color 0.2s, border-color 0.2s;
+  transition: opacity 0.15s;
 }
-.fab:hover {
+.fab-actions {
+  position: absolute;
+  display: flex;
+  gap: 10px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease 0.04s;
+}
+.fab:hover,
+.fab:focus-within {
+  width: 132px;
+  height: 132px;
+  border-radius: 26px;
   opacity: 1;
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
-  border-color: rgba(255, 255, 255, 0.32);
+  background: rgba(14, 16, 22, 0.92);
+  border-color: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(14px);
 }
+.fab:hover .fab-plus,
+.fab:focus-within .fab-plus { opacity: 0; }
+.fab:hover .fab-actions,
+.fab:focus-within .fab-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.fab-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 12px;
+  letter-spacing: 1px;
+  transition: background-color 0.2s, color 0.2s, transform 0.15s;
+}
+.fab-btn:hover {
+  background: var(--accent);
+  color: #12040b;
+}
+.fab-btn:active { transform: scale(0.96); }
 
 /* 专辑右上角的删除：悬停才浮现 */
 .album-remove {

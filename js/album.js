@@ -7,16 +7,12 @@
 
   const PLACEHOLDER = window.PLACEHOLDER_AUDIO || 'audio/placeholder.wav';
   const DEFAULT_ACCENT = '#ff4fa3';
-  const SPEED = 7; // 每秒旋转角度
-  const SPIN_MS = (360 / SPEED) * 1000; // 转一圈所需毫秒数
-  const CARD = 210; // 封面边长（与 css 里 --card 保持一致）
   const GAP = 44; // 相邻封面之间至少留出的弧长
   const STORE_KEY = 'album_data';
   const ACCENTS = ['#ff4fa3', '#38e1ff', '#ffb454', '#a3e635', '#9db4ff', '#c084fc'];
 
-  const ring = document.getElementById('ring');
   const stage = document.querySelector('.stage');
-  const addAlbumBtn = document.getElementById('addAlbum');
+  const fab = document.getElementById('fab');
 
   const view = document.getElementById('albumView');
   const viewBg = document.getElementById('viewBg');
@@ -154,14 +150,10 @@
 
   const cards = [];
   let albums = loadAlbums();
-  let step = 0;
-  let angleOffset = 0;
-  let hoverCount = 0;
   let viewOpen = false;
   let activeIndex = -1;
   let lastFocus = null;
   let closeTimer = null;
-  let spinAnim = null;
   const current = { album: -1, track: -1 };
 
   const escapeHtml = (value) =>
@@ -195,18 +187,29 @@
       if (raw) {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed) && parsed.length) {
-          return parsed.map((album) => ({ ...album, cover: normalizeCover(album.cover) }));
+          return parsed.map((album, index) => ({
+            ...album,
+            cover: normalizeCover(album.cover),
+            ring: normalizeRing(album, index),
+          }));
         }
       }
     } catch (err) {
       /* 数据损坏时回落到默认专辑 */
     }
 
-    return (window.ALBUMS || []).map((album) => ({
+    return (window.ALBUMS || []).map((album, index) => ({
       ...album,
       cover: normalizeCover(album.cover),
+      ring: normalizeRing(album, index),
       tracks: album.tracks.map((track) => ({ ...track })),
     }));
+  }
+
+  /** 老数据没有圈层字段：按奇偶分到内外两圈，让画面直接是双环 */
+  function normalizeRing(album, index) {
+    if (album && (album.ring === 'inner' || album.ring === 'outer')) return album.ring;
+    return index % 2 === 0 ? 'outer' : 'inner';
   }
 
   function saveAlbums() {
@@ -237,118 +240,165 @@
     toastTimer = setTimeout(() => el.classList.remove('is-on'), 2200);
   }
 
-  /* ---------------- 环形专辑 ---------------- */
-  /**
-   * 专辑变多时：先加大半径，半径到顶后再按需缩小封面，
-   * 保证每张占到的弧长 ≥ 封面宽 + 间隙，永远不会叠在一起。
-   */
-  function layoutRing() {
-    const count = Math.max(1, albums.length);
+  /* ---------------- 双层环形专辑 ---------------- */
+  const RINGS = {
+    outer: {
+      el: document.getElementById('ringOuter'),
+      cards: [],
+      step: 0,
+      offset: 0,
+      hover: 0,
+      anim: null,
+      baseRadius: 445,
+      maxCard: 190,
+      widthRatio: 0.31,
+    },
+    inner: {
+      el: document.getElementById('ringInner'),
+      cards: [],
+      step: 0,
+      offset: 0.5,
+      hover: 0,
+      anim: null,
+      baseRadius: 210,
+      maxCard: 138,
+      widthRatio: 0.16,
+    },
+  };
+
+  /** 每一圈单独算半径和封面尺寸，保证这一圈自己不会重叠 */
+  function layoutRing(ring) {
+    const count = ring.cards.length;
+    if (!count) return;
+
     const stageW = stage.clientWidth || window.innerWidth;
-    const radiusMax = Math.min(620, stageW * 0.42);
+    const radiusMax = Math.min(ring.baseRadius, stageW * ring.widthRatio);
 
-    // 半径封顶时，每张专辑能分到的弧长
-    const arc = (2 * Math.PI * radiusMax) / count;
-    const card = Math.min(CARD, Math.max(40, arc - GAP));
-    const radius = Math.max(380, (count * (card + GAP)) / (2 * Math.PI));
+    let radius = (count * (ring.maxCard + GAP)) / (2 * Math.PI);
+    radius = Math.min(radiusMax, Math.max(radius, radiusMax * 0.88));
 
-    ring.style.setProperty('--card', `${card.toFixed(1)}px`);
-    ring.style.setProperty('--radius', `${radius.toFixed(1)}px`);
+    // 半径被压住时按弧长缩小封面
+    const arc = (2 * Math.PI * radius) / count;
+    const card = Math.min(ring.maxCard, Math.max(44, arc - GAP));
+
+    ring.el.style.setProperty('--card', `${card.toFixed(1)}px`);
+    ring.el.style.setProperty('--radius', `${radius.toFixed(1)}px`);
   }
 
-  function renderRing() {
-    ring.innerHTML = '';
-    cards.length = 0;
-    step = albums.length ? 360 / albums.length : 0;
-    // 偶数张时让两张分列正前方，构图左右对称
-    angleOffset = 0;
+  function buildCard(album, index, ring) {
+    const card = document.createElement('div');
+    card.className = 'album';
+    card.dataset.index = String(index);
+    card.tabIndex = 0;
+    card.setAttribute('role', 'button');
+    card.setAttribute('aria-label', `${album.title}，${album.sub}，查看曲目`);
+    card.innerHTML = `
+      <span class="album-inner">
+        <img src="${album.cover}" alt="" draggable="false">
+        <span class="album-meta">
+          <strong>${escapeHtml(album.title)}</strong>
+          <em>${escapeHtml(album.sub)}</em>
+        </span>
+      </span>
+      <button class="album-remove" type="button" aria-label="删除专辑 ${escapeHtml(album.title)}">✕</button>
+    `;
+
+    // 悬停只暂停它所在的那一圈；背面的专辑不参与
+    card.addEventListener('mouseenter', () => {
+      if (card.classList.contains('is-back')) return;
+      ring.hover += 1;
+      syncPause();
+    });
+    card.addEventListener('mouseleave', () => {
+      ring.hover = Math.max(0, ring.hover - 1);
+      syncPause();
+    });
+
+    card.addEventListener('click', (event) => {
+      if (event.target.closest('.album-remove')) return;
+      if (card.classList.contains('is-back')) return; // 背面的专辑不响应点击
+      openView(Number(card.dataset.index), card);
+    });
+    card.addEventListener('keydown', (event) => {
+      if (event.target !== card) return;
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      if (card.classList.contains('is-back')) return;
+      event.preventDefault();
+      openView(Number(card.dataset.index), card);
+    });
+
+    card.querySelector('.album-remove').addEventListener('click', (event) => {
+      event.stopPropagation();
+      removeAlbum(Number(card.dataset.index));
+    });
+
+    return card;
+  }
+
+  function renderRings() {
+    Object.values(RINGS).forEach((ring) => {
+      ring.el.innerHTML = '';
+      ring.cards = [];
+      ring.step = 0;
+      ring.hover = 0;
+      ring.anim = null;
+    });
 
     albums.forEach((album, index) => {
-      const card = document.createElement('div');
-      card.className = 'album';
-      card.dataset.index = String(index);
-      card.tabIndex = 0;
-      card.setAttribute('role', 'button');
-      card.style.setProperty('--angle', `${index * step + angleOffset}deg`);
-      card.setAttribute('aria-label', `${album.title}，${album.sub}，查看曲目`);
-      card.innerHTML = `
-        <span class="album-inner">
-          <img src="${album.cover}" alt="" draggable="false">
-          <span class="album-meta">
-            <strong>${escapeHtml(album.title)}</strong>
-            <em>${escapeHtml(album.sub)}</em>
-          </span>
-        </span>
-        <button class="album-remove" type="button" aria-label="删除专辑 ${escapeHtml(album.title)}">✕</button>
-      `;
+      const ring = album.ring === 'inner' ? RINGS.inner : RINGS.outer;
+      const card = buildCard(album, index, ring);
+      ring.el.appendChild(card);
+      ring.cards.push(card);
+    });
 
-      // 悬停停止旋转（计数避免在专辑之间移动时闪跳）；背面的专辑不参与
-      card.addEventListener('mouseenter', () => {
-        if (card.classList.contains('is-back')) return;
-        hoverCount += 1;
-        syncPause();
+    Object.values(RINGS).forEach((ring) => {
+      ring.step = ring.cards.length ? 360 / ring.cards.length : 0;
+      ring.cards.forEach((card, index) => {
+        // 内圈错开半格，避免两张“正对面”的封面正好叠在一起
+        card.style.setProperty('--angle', `${(index + ring.offset) * ring.step}deg`);
       });
-      card.addEventListener('mouseleave', () => {
-        hoverCount = Math.max(0, hoverCount - 1);
-        syncPause();
-      });
-
-      card.addEventListener('click', (event) => {
-        if (event.target.closest('.album-remove')) return;
-        if (card.classList.contains('is-back')) return; // 背面的专辑不响应点击
-        openView(index, card);
-      });
-      card.addEventListener('keydown', (event) => {
-        if (event.target !== card) return;
-        if (event.key !== 'Enter' && event.key !== ' ') return;
-        if (card.classList.contains('is-back')) return;
-        event.preventDefault();
-        openView(index, card);
-      });
-
-      card.querySelector('.album-remove').addEventListener('click', (event) => {
-        event.stopPropagation();
-        removeAlbum(index);
-      });
-
-      ring.appendChild(card);
-      cards[index] = card;
+      layoutRing(ring);
     });
 
     updateFacing();
-    layoutRing(); // 卡片都放上去之后再按实际尺寸收敛
   }
 
-  /** 读取环形 CSS 动画当前转到的角度（暂停时也会冻结在当前位置） */
-  function currentRotation() {
-    // 缓存动画对象，避免每 90ms 都新建一次数组
-    if (!spinAnim || spinAnim.playState === 'idle') {
-      spinAnim = ring.getAnimations()[0] || null;
+  /** 读某一圈动画当前转到的角度（暂停时冻结，方向不影响正反面判断） */
+  function ringRotation(ring) {
+    if (!ring.anim || ring.anim.playState === 'idle') {
+      ring.anim = ring.el.getAnimations()[0] || null;
     }
-    const time = spinAnim && spinAnim.currentTime ? Number(spinAnim.currentTime) : 0;
-    return (((time % SPIN_MS) / SPIN_MS) * 360) % 360;
+
+    const timing = ring.anim && ring.anim.effect ? ring.anim.effect.getTiming() : null;
+    const duration = timing && Number(timing.duration) > 0 ? Number(timing.duration) : 50000;
+    const time = ring.anim && ring.anim.currentTime ? Number(ring.anim.currentTime) : 0;
+    return (((time % duration) / duration) * 360) % 360;
   }
 
   /** 判断每张是否转到背面：背面压暗、隐藏文字、不响应鼠标 */
   function updateFacing() {
-    const rot = currentRotation();
+    Object.values(RINGS).forEach((ring) => {
+      if (!ring.cards.length) return;
 
-    cards.forEach((card, index) => {
-      const world = ((rot + index * step + angleOffset) * Math.PI) / 180;
-      const isBack = Math.cos(world) < -0.05;
-      if (card.classList.contains('is-back') !== isBack) {
-        card.classList.toggle('is-back', isBack);
-      }
+      const rot = ringRotation(ring);
+      ring.cards.forEach((card, index) => {
+        const world = ((rot + (index + ring.offset) * ring.step) * Math.PI) / 180;
+        const isBack = Math.cos(world) < -0.05;
+        if (card.classList.contains('is-back') !== isBack) {
+          card.classList.toggle('is-back', isBack);
+        }
+      });
     });
   }
 
-  /** 悬停或看着详情时暂停旋转（只切换 animation-play-state，不打断动画） */
+  /** 悬停某圈或查看详情时暂停：只切换 animation-play-state，不打断动画 */
   function syncPause() {
-    ring.classList.toggle('is-paused', hoverCount > 0 || viewOpen);
+    Object.values(RINGS).forEach((ring) => {
+      ring.el.classList.toggle('is-paused', viewOpen || ring.hover > 0);
+    });
   }
 
   setInterval(updateFacing, 90);
-  updateFacing();
 
   /* ---------------- 小弹窗 ---------------- */
   function confirmModal(title, text) {
@@ -416,13 +466,15 @@
   }
 
   /* ---------------- 新增 / 删除专辑 ---------------- */
-  function openAlbumForm() {
+  function openAlbumForm(ringKey = 'outer') {
+    const ringName = ringKey === 'inner' ? '内圈' : '外圈';
+
     const modal = document.createElement('div');
     modal.className = 'mini-modal';
     modal.innerHTML = `
       <div class="mini-mask" data-close></div>
       <form class="mini-panel" novalidate>
-        <h3>新增专辑</h3>
+        <h3>新增专辑 · ${ringName}</h3>
         <label class="mini-field">
           <span>专辑名</span>
           <input id="albumTitle" maxlength="24" placeholder="例如：MIDNIGHT DRIVE">
@@ -481,6 +533,7 @@
         year: new Date().getFullYear(),
         accent: ACCENTS[albums.length % ACCENTS.length],
         cover: cover || `images/albums/${(albums.length % 6) + 1}.jpg`,
+        ring: ringKey,
         tracks: [],
       });
 
@@ -490,7 +543,7 @@
       }
 
       modal.remove();
-      renderRing();
+      renderRings();
       toast(`已添加专辑《${title}》，点开封面可加歌`);
     });
   }
@@ -520,7 +573,7 @@
     }
 
     saveAlbums();
-    renderRing();
+    renderRings();
     toast('已删除专辑');
   }
 
@@ -1039,9 +1092,16 @@
   });
 
   /* ---------------- 启动 ---------------- */
-  addAlbumBtn.addEventListener('click', openAlbumForm);
-  window.addEventListener('resize', layoutRing);
+  fab.addEventListener('click', (event) => {
+    const btn = event.target.closest('.fab-btn');
+    if (!btn) return;
+    openAlbumForm(btn.dataset.ring === 'inner' ? 'inner' : 'outer');
+  });
+  window.addEventListener('resize', () => {
+    Object.values(RINGS).forEach(layoutRing);
+  });
   restoreBackground();
-  renderRing();
+  renderRings();
 })();
+
 
