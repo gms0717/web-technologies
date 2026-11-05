@@ -40,6 +40,7 @@
 
   const audio = new Audio();
   audio.preload = 'auto';
+  window.__playerAudio = audio; // 便于自检脚本查看加载状态
 
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
@@ -70,6 +71,17 @@
   }
 
   function loadAlbums() {
+    // 数据文件重新生成过（版本号变化）就丢掉浏览器里的旧数据，否则导入的新歌看不到
+    const version = window.ALBUMS_VERSION || '';
+    try {
+      if (version && localStorage.getItem(`${STORE_KEY}_ver`) !== version) {
+        localStorage.removeItem(STORE_KEY);
+        localStorage.setItem(`${STORE_KEY}_ver`, version);
+      }
+    } catch (err) {
+      /* 忽略存储异常 */
+    }
+
     try {
       const raw = localStorage.getItem(STORE_KEY);
       if (raw) {

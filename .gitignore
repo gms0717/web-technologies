@@ -4,3 +4,8 @@ node_modules/
 *.log
 .dsh-tmp/
 
+# 本地音乐素材：体积大、且多为版权内容，不纳入版本库
+# （需要发布某几首时用 git add -f 单独强制添加）
+audio/源/
+audio/*/
+专辑/
