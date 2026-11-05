@@ -261,7 +261,7 @@
       hover: 0,
       anim: null,
       baseRadius: 210,
-      maxCard: 142,
+      maxCard: 152,
       widthRatio: 0.16,
     },
   };
@@ -1248,6 +1248,7 @@
   renderRings();
   renderMarquees();
 })();
+
 
 
 

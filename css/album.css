@@ -1,4 +1,4 @@
-﻿/* =========================================================
+/* =========================================================
    album.css — 环绕专辑页
    背景层 / HUD / 书页式专辑堆 / 专辑详情 / 曲目 / 播放器
    ========================================================= */
@@ -145,7 +145,7 @@ body::after {
   position: absolute;
   left: 50%;
   width: 200vmax;
-  height: 120px;
+  height: 170px;
   margin-left: -100vmax;
   overflow: hidden;
   pointer-events: none;
@@ -154,8 +154,8 @@ body::after {
   mask-image: linear-gradient(90deg, transparent 0%, #000 7%, #000 93%, transparent 100%);
 }
 
-.marquee--top { top: calc(21% - 60px); }
-.marquee--bottom { top: calc(79% - 60px); }
+.marquee--top { top: calc(21% - 85px); }
+.marquee--bottom { top: calc(79% - 85px); }
 
 /* 上面的带：内容往东南（右下）走；下面的带：内容往西北（左上）走 */
 .marquee--top .marquee-track { animation: marquee-se 64s linear infinite; }
@@ -191,7 +191,7 @@ body::after {
   border-radius: 10px;
   background: rgba(10, 12, 18, 0.6);
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45);
-  opacity: 0.22;
+  opacity: 0.45;
   transition: opacity 0.3s;
 }
 .marquee:hover .marquee-item { opacity: 0.9; }
@@ -324,10 +324,21 @@ body::after {
   transform: scale(1.1) rotateY(-12deg);
 }
 
-/* 转到背面的专辑：整体降透明度（合成层属性，不重绘画面） */
-.album.is-back { opacity: 0.5; }
+/* 转到背面的专辑：始终不透明，只盖一层暗色，不做半透明处理 */
 .album.is-back .album-meta { opacity: 0; }
 .album.is-back .album-inner { transform: none; }
+
+.album-inner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background: #05060a;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.album.is-back .album-inner::after { opacity: 0.45; }
 
 .album img {
   width: 100%;
@@ -856,6 +867,7 @@ body::after {
   /* 环形仍保持旋转，但放慢到 1/4；否则会被压成 0.01ms 变成闪烁 */
   .ring { animation-duration: 205.6s !important; }
 }
+
 
 
 
