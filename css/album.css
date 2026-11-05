@@ -150,8 +150,19 @@ body::after {
   width: 0;
   height: 0;
   transform-style: preserve-3d;
-  transform: rotateX(-8deg) rotateY(var(--rot, 0deg));
+  transform: rotateX(-8deg);
+  will-change: transform;
+  /* 交给合成线程匀速转，不经过 JS，不会掉帧 */
+  animation: ring-spin 51.4s linear infinite;
 }
+
+@keyframes ring-spin {
+  from { transform: rotateX(-8deg) rotateY(0deg); }
+  to { transform: rotateX(-8deg) rotateY(360deg); }
+}
+
+/* 悬停专辑或打开详情时暂停：只改播放状态，不重置角度 */
+.ring.is-paused { animation-play-state: paused; }
 
 .album {
   position: absolute;
@@ -188,10 +199,21 @@ body::after {
   box-shadow: 0 30px 70px rgba(0, 0, 0, 0.7), inset 0 0 0 1px rgba(255, 255, 255, 0.18);
 }
 
-/* 转到背面的专辑：压暗并隐藏文字，不响应鼠标 */
+/* 转到背面的专辑：用半透明黑覆盖而不是 filter，避免旋转时反复重绘 */
 .album.is-back { pointer-events: none; }
-.album.is-back .album-inner { filter: brightness(0.62) saturate(0.75); }
 .album.is-back .album-meta { opacity: 0; }
+
+.album-inner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: #04050a;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+.album.is-back .album-inner::after { opacity: 0.62; }
 
 .album img {
   width: 100%;
@@ -668,6 +690,8 @@ body::after {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+  /* 环形仍保持旋转，但放慢到 1/4；否则会被压成 0.01ms 变成闪烁 */
+  .ring { animation-duration: 205.6s !important; }
 }
 
 

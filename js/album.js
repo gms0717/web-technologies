@@ -8,6 +8,7 @@
   const PLACEHOLDER = window.PLACEHOLDER_AUDIO || 'audio/placeholder.wav';
   const DEFAULT_ACCENT = '#ff4fa3';
   const SPEED = 7; // 每秒旋转角度
+  const SPIN_MS = (360 / SPEED) * 1000; // 转一圈所需毫秒数
   const CARD = 210; // 封面边长（与 css 里 --card 保持一致）
   const GAP = 44; // 相邻封面之间至少留出的弧长
   const STORE_KEY = 'album_data';
@@ -46,13 +47,11 @@
   let albums = loadAlbums();
   let step = 0;
   let angleOffset = 0;
-  let rotation = 0;
   let hoverCount = 0;
   let viewOpen = false;
   let activeIndex = -1;
   let lastFocus = null;
   let closeTimer = null;
-  let lastTick = performance.now();
   const current = { album: -1, track: -1 };
 
   const escapeHtml = (value) =>
@@ -152,8 +151,8 @@
       `;
 
       // 悬停停止旋转（计数避免在专辑之间移动时闪跳）
-      card.addEventListener('mouseenter', () => { hoverCount += 1; });
-      card.addEventListener('mouseleave', () => { hoverCount = Math.max(0, hoverCount - 1); });
+      card.addEventListener('mouseenter', () => { hoverCount += 1; syncPause(); });
+      card.addEventListener('mouseleave', () => { hoverCount = Math.max(0, hoverCount - 1); syncPause(); });
 
       card.addEventListener('click', (event) => {
         if (event.target.closest('.album-remove')) return;
@@ -179,32 +178,33 @@
     layoutRing(); // 卡片都放上去之后再按实际尺寸收敛
   }
 
+  /** 读取环形 CSS 动画当前转到的角度（暂停时也会冻结在当前位置） */
+  function currentRotation() {
+    const anim = ring.getAnimations()[0];
+    const time = anim && anim.currentTime ? Number(anim.currentTime) : 0;
+    return (((time % SPIN_MS) / SPIN_MS) * 360) % 360;
+  }
+
   /** 判断每张是否转到背面：背面压暗、隐藏文字、不响应鼠标 */
   function updateFacing() {
+    const rot = currentRotation();
+
     cards.forEach((card, index) => {
-      const world = ((rotation + index * step + angleOffset) * Math.PI) / 180;
-      card.classList.toggle('is-back', Math.cos(world) < -0.05);
+      const world = ((rot + index * step + angleOffset) * Math.PI) / 180;
+      const isBack = Math.cos(world) < -0.05;
+      if (card.classList.contains('is-back') !== isBack) {
+        card.classList.toggle('is-back', isBack);
+      }
     });
   }
 
-  /** 用定时器驱动旋转：7°/s 足够顺滑，也比 rAF 更不容易被环境节流 */
-  function tick() {
-    const now = performance.now();
-    const dt = Math.min(0.2, (now - lastTick) / 1000);
-    lastTick = now;
-
-    if (!viewOpen && hoverCount === 0) rotation += SPEED * dt;
-
-    ring.style.setProperty('--rot', `${rotation.toFixed(2)}deg`);
-    updateFacing();
+  /** 悬停或看着详情时暂停旋转（只切换 animation-play-state，不打断动画） */
+  function syncPause() {
+    ring.classList.toggle('is-paused', hoverCount > 0 || viewOpen);
   }
 
-  setInterval(tick, 33);
-  tick();
-
-  document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) lastTick = performance.now();
-  });
+  setInterval(updateFacing, 90);
+  updateFacing();
 
   /* ---------------- 小弹窗 ---------------- */
   function confirmModal(title, text) {
@@ -385,6 +385,7 @@
     activeIndex = index;
     viewOpen = true;
     lastFocus = cardEl;
+    syncPause();
 
     document.documentElement.style.setProperty('--accent', album.accent || DEFAULT_ACCENT);
     viewBg.style.backgroundImage = `url("${album.cover}")`;
@@ -449,7 +450,7 @@
     }, 340);
 
     if (lastFocus && document.contains(lastFocus)) lastFocus.focus({ preventScroll: true });
-    lastTick = performance.now();
+    syncPause();
   }
 
   view.addEventListener('click', (event) => {
