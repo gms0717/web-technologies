@@ -526,16 +526,17 @@ body::after {
   width: 100%;
   padding: 9px 12px;
   border-radius: 10px;
-  background: rgba(8, 9, 13, 0.58);
-  backdrop-filter: blur(10px);
-  color: rgba(255, 255, 255, 0.9);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.92);
   text-align: left;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.7), 0 0 2px rgba(0, 0, 0, 0.55);
   transition: background-color 0.18s, color 0.18s;
 }
-.track:hover { background: rgba(8, 9, 13, 0.78); color: #fff; }
-.track-index { color: var(--faint); font-size: 12px; font-variant-numeric: tabular-nums; }
+/* 只有鼠标移到这一行时才出现底色，平时干干净净贴在封面上 */
+.track:hover { background: rgba(8, 9, 13, 0.62); color: #fff; }
+.track-index { color: rgba(255, 255, 255, 0.6); font-size: 12px; font-variant-numeric: tabular-nums; }
 .track-name { overflow: hidden; font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
-.track-time { color: var(--faint); font-size: 12px; text-align: right; font-variant-numeric: tabular-nums; }
+.track-time { color: rgba(255, 255, 255, 0.6); font-size: 12px; text-align: right; font-variant-numeric: tabular-nums; }
 
 .track-eq { display: none; align-items: flex-end; gap: 2px; height: 14px; }
 .track-eq i {
@@ -551,7 +552,8 @@ body::after {
   0%, 100% { height: 4px; }
   50% { height: 14px; }
 }
-.track.is-current { background: rgba(8, 9, 13, 0.78); color: #fff; }
+.track.is-current { background: transparent; color: #fff; }
+.track.is-current:hover { background: rgba(8, 9, 13, 0.62); }
 .track.is-current .track-index { color: var(--accent); }
 .track.is-current .track-eq { display: inline-flex; }
 .track.is-paused .track-eq i { animation-play-state: paused; }
