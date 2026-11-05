@@ -140,63 +140,58 @@ body::after {
   pointer-events: none;
 }
 
+/* 两条平行斜带：绕 45° 后横贯屏幕，一条在上半、一条在下半，中间留空隙 */
 .marquee {
   position: absolute;
-  width: 240px;
-  height: 540px;
+  left: 50%;
+  width: 200vmax;
+  height: 120px;
+  margin-left: -100vmax;
   overflow: hidden;
   pointer-events: none;
-  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 12%, #000 88%, transparent 100%);
-  mask-image: linear-gradient(180deg, transparent 0%, #000 12%, #000 88%, transparent 100%);
+  transform: rotate(45deg);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 7%, #000 93%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 7%, #000 93%, transparent 100%);
 }
 
-/* 左下一列：斜 45°，内容向上走；窗口贴在左下角 */
-.marquee--left {
-  left: -30px;
-  bottom: -40px;
-  transform: rotate(45deg);
-  transform-origin: left bottom;
-}
-.marquee--left .marquee-track { animation: marquee-up 48s linear infinite; }
+.marquee--top { top: calc(21% - 60px); }
+.marquee--bottom { top: calc(79% - 60px); }
 
-/* 右上一列：斜 45°，内容向下走；窗口贴在右上角 */
-.marquee--right {
-  right: -30px;
-  top: -40px;
-  transform: rotate(45deg);
-  transform-origin: right top;
-}
-.marquee--right .marquee-track { animation: marquee-down 62s linear infinite; }
+/* 上面的带：内容往东南（右下）走；下面的带：内容往西北（左上）走 */
+.marquee--top .marquee-track { animation: marquee-se 64s linear infinite; }
+.marquee--bottom .marquee-track { animation: marquee-nw 52s linear infinite; }
 
 .marquee-track {
   display: flex;
-  flex-direction: column;
-  gap: 18px;
-  padding: 9px;
+  align-items: center;
+  gap: 16px;
+  height: 100%;
   will-change: transform;
 }
 .marquee:hover .marquee-track { animation-play-state: paused; }
 
-@keyframes marquee-up {
-  from { transform: translateY(0); }
-  to { transform: translateY(-50%); }
+/* --loop 由脚本按重复份数写入，保证无缝衔接 */
+@keyframes marquee-se {
+  from { transform: translateX(calc(-1 * var(--loop, 50%))); }
+  to { transform: translateX(0); }
 }
-@keyframes marquee-down {
-  from { transform: translateY(-50%); }
-  to { transform: translateY(0); }
+@keyframes marquee-nw {
+  from { transform: translateX(0); }
+  to { transform: translateX(calc(-1 * var(--loop, 50%))); }
 }
 
 /* 16:9 的图片条 */
 .marquee-item {
   position: relative;
-  width: 222px;
+  pointer-events: auto;
+  height: 100%;
   aspect-ratio: 16 / 9;
   flex: 0 0 auto;
   overflow: hidden;
   border-radius: 10px;
   background: rgba(10, 12, 18, 0.6);
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45);
-  opacity: 0.42;
+  opacity: 0.22;
   transition: opacity 0.3s;
 }
 .marquee:hover .marquee-item { opacity: 0.9; }
@@ -232,7 +227,7 @@ body::after {
 /* 每列一个低调的“＋”，点它从电脑里加图 */
 .marquee-add {
   position: fixed;
-  z-index: 6;
+  z-index: 50;
   display: grid;
   place-items: center;
   width: 30px;
@@ -255,6 +250,7 @@ body::after {
 .stage {
   position: relative;
   z-index: 10;
+  pointer-events: none; /* 让点击穿透到下方轮播层，只有封面响应 */
   display: grid;
   place-items: center;
   height: 100vh;
@@ -277,12 +273,12 @@ body::after {
 }
 
 .ring--outer {
-  --shift: 54px;
+  --shift: 45px;
   animation: ring-spin 62s linear infinite;
 }
 
 .ring--inner {
-  --shift: -150px;
+  --shift: -110px;
   animation: ring-spin 46s linear infinite reverse;
 }
 
@@ -295,6 +291,7 @@ body::after {
 .ring.is-paused { animation-play-state: paused; }
 
 .album {
+  pointer-events: auto;
   position: absolute;
   top: 0;
   left: 0;
@@ -388,8 +385,9 @@ body::after {
 }
 .fab-actions {
   position: absolute;
+  inset: 0;
   display: flex;
-  gap: 10px;
+  flex-direction: column;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s ease 0.04s;
@@ -412,21 +410,22 @@ body::after {
   pointer-events: auto;
 }
 
+/* 两个长方形：内圈在上、外圈在下，各占一半，把方形填满 */
 .fab-btn {
-  width: 48px;
-  height: 48px;
-  border-radius: 15px;
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.82);
-  font-size: 12px;
-  letter-spacing: 1px;
-  transition: background-color 0.2s, color 0.2s, transform 0.15s;
+  flex: 1 1 50%;
+  width: 100%;
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 13px;
+  letter-spacing: 2px;
+  transition: background-color 0.2s, color 0.2s;
 }
+.fab-btn + .fab-btn { border-top: 1px solid rgba(255, 255, 255, 0.12); }
 .fab-btn:hover {
   background: var(--accent);
   color: #12040b;
 }
-.fab-btn:active { transform: scale(0.96); }
 
 /* 专辑右上角的删除：悬停才浮现 */
 .album-remove {
@@ -857,6 +856,10 @@ body::after {
   /* 环形仍保持旋转，但放慢到 1/4；否则会被压成 0.01ms 变成闪烁 */
   .ring { animation-duration: 205.6s !important; }
 }
+
+
+
+
 
 
 

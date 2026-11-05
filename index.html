@@ -30,11 +30,11 @@
 
   <!-- 斜向图片轮播：左下一列向上滚，右上一列向下滚，压在专辑环下面 -->
   <section class="marquees" aria-hidden="true">
-    <div class="marquee marquee--left">
-      <div class="marquee-track" id="marqueeLeft"></div>
+    <div class="marquee marquee--top">
+      <div class="marquee-track" id="marqueeTop"></div>
     </div>
-    <div class="marquee marquee--right">
-      <div class="marquee-track" id="marqueeRight"></div>
+    <div class="marquee marquee--bottom">
+      <div class="marquee-track" id="marqueeBottom"></div>
     </div>
   </section>
 
@@ -85,12 +85,12 @@
     </div>
   </footer>
 
-  <!-- 新增专辑：平时是一颗小圆点，悬停展开成方形，分内外圈两个按钮 -->
+  <!-- 新增专辑：平时是一颗小圆点，悬停展开成方形，内圈在上、外圈在下 -->
   <div class="fab" id="fab">
     <span class="fab-plus" aria-hidden="true">＋</span>
     <div class="fab-actions">
-      <button class="fab-btn" type="button" data-ring="outer" title="新增外圈专辑">外圈</button>
       <button class="fab-btn" type="button" data-ring="inner" title="新增内圈专辑">内圈</button>
+      <button class="fab-btn" type="button" data-ring="outer" title="新增外圈专辑">外圈</button>
     </div>
   </div>
 

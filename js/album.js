@@ -1,4 +1,4 @@
-/* =========================================================
+﻿/* =========================================================
    album.js — 环绕专辑交互
    环形旋转 / 悬停暂停并翻开 / 增删专辑与曲目 / 播放器 / 背景切换
    ========================================================= */
@@ -261,7 +261,7 @@
       hover: 0,
       anim: null,
       baseRadius: 210,
-      maxCard: 138,
+      maxCard: 142,
       widthRatio: 0.16,
     },
   };
@@ -1094,7 +1094,7 @@
   /* ---------------- 斜向图片轮播 ---------------- */
   const BANNERS_KEY = 'album_banners';
   const DEFAULT_BANNERS = [1, 2, 3, 4, 5, 6].map((n) => `images/banners/${n}.jpg`);
-  const marqueeTracks = [document.getElementById('marqueeLeft'), document.getElementById('marqueeRight')];
+  const marqueeTracks = [document.getElementById('marqueeTop'), document.getElementById('marqueeBottom')];
 
   function loadBanners() {
     try {
@@ -1124,7 +1124,7 @@
   function renderMarquees() {
     const count = banners.length;
 
-    marqueeTracks.forEach((track, column) => {
+    marqueeTracks.forEach((track) => {
       if (!track) return;
 
       if (!count) {
@@ -1132,18 +1132,28 @@
         return;
       }
 
-      // 右列错开两张，两列不会同步
-      const order = banners.map((_, index) => index);
-      const rotated = column === 1 && count > 2 ? [...order.slice(2), ...order.slice(0, 2)] : order;
-
       const item = (index) => `
         <figure class="marquee-item" data-index="${index}">
           <img src="${banners[index]}" alt="" draggable="false">
           <button class="marquee-remove" type="button" aria-label="移除这张轮播图">✕</button>
         </figure>`;
 
-      // 内容放两遍，translateY(-50%) 就能无缝衔接
-      track.innerHTML = [...rotated.map(item), ...rotated.map(item)].join('');
+      // 按可视宽度算需要重复几份，避免循环时露出空白
+      const band = track.parentElement;
+      const bandWidth = (band && band.clientWidth) || 2000;
+      const bandHeight = (band && band.clientHeight) || 220;
+      const itemWidth = (bandHeight * 16) / 9 + 16;
+      const stripWidth = Math.max(1, count * itemWidth);
+      const copies = Math.max(2, Math.ceil(bandWidth / stripWidth) + 1);
+
+      const order = banners.map((_, index) => index);
+      const items = [];
+      for (let copy = 0; copy < copies; copy += 1) {
+        order.forEach((index) => items.push(item(index)));
+      }
+
+      track.style.setProperty('--loop', `${(100 / copies).toFixed(4)}%`);
+      track.innerHTML = items.join('');
     });
   }
 
@@ -1238,5 +1248,6 @@
   renderRings();
   renderMarquees();
 })();
+
 
 
