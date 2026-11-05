@@ -8,10 +8,13 @@
   const PLACEHOLDER = window.PLACEHOLDER_AUDIO || 'audio/placeholder.wav';
   const DEFAULT_ACCENT = '#ff4fa3';
   const SPEED = 7; // 每秒旋转角度
+  const CARD = 210; // 封面边长（与 css 里 --card 保持一致）
+  const GAP = 44; // 相邻封面之间至少留出的弧长
   const STORE_KEY = 'album_data';
   const ACCENTS = ['#ff4fa3', '#38e1ff', '#ffb454', '#a3e635', '#9db4ff', '#c084fc'];
 
   const ring = document.getElementById('ring');
+  const stage = document.querySelector('.stage');
   const addAlbumBtn = document.getElementById('addAlbum');
 
   const view = document.getElementById('albumView');
@@ -104,6 +107,24 @@
   }
 
   /* ---------------- 环形专辑 ---------------- */
+  /**
+   * 专辑变多时：先加大半径，半径到顶后再按需缩小封面，
+   * 保证每张占到的弧长 ≥ 封面宽 + 间隙，永远不会叠在一起。
+   */
+  function layoutRing() {
+    const count = Math.max(1, albums.length);
+    const stageW = stage.clientWidth || window.innerWidth;
+    const radiusMax = Math.min(620, stageW * 0.42);
+
+    // 半径封顶时，每张专辑能分到的弧长
+    const arc = (2 * Math.PI * radiusMax) / count;
+    const card = Math.min(CARD, Math.max(40, arc - GAP));
+    const radius = Math.max(380, (count * (card + GAP)) / (2 * Math.PI));
+
+    ring.style.setProperty('--card', `${card.toFixed(1)}px`);
+    ring.style.setProperty('--radius', `${radius.toFixed(1)}px`);
+  }
+
   function renderRing() {
     ring.innerHTML = '';
     cards.length = 0;
@@ -155,6 +176,7 @@
     });
 
     updateFacing();
+    layoutRing(); // 卡片都放上去之后再按实际尺寸收敛
   }
 
   /** 判断每张是否转到背面：背面压暗、隐藏文字、不响应鼠标 */
@@ -764,6 +786,7 @@
 
   /* ---------------- 启动 ---------------- */
   addAlbumBtn.addEventListener('click', openAlbumForm);
+  window.addEventListener('resize', layoutRing);
   restoreBackground();
   renderRing();
 })();

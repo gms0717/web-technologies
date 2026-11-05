@@ -658,7 +658,6 @@ body::after {
 
 /* ---------------- 响应式（桌面优先，窄屏只做缩放） ---------------- */
 @media (max-width: 1180px) {
-  .ring { --radius: 320px; --card: 184px; }
   .view-content { padding: 26px 26px 20px; }
   .view-title { font-size: 26px; }
   .player-text { width: 140px; }
