@@ -42,6 +42,114 @@
   audio.preload = 'auto';
   window.__playerAudio = audio; // 便于自检脚本查看加载状态
 
+  /* ---------------- 本地音频存储 ----------------
+     从电脑里选的歌会尽量存进 IndexedDB（http/https 下有效，刷新后还能播）；
+     file:// 打开时浏览器不给用数据库，就只在本次会话里保留（src 记为 local:<id>）。 */
+  const AUDIO_DB = 'album_audio';
+  const AUDIO_STORE = 'files';
+  const DB_TIMEOUT = 2500;
+  const localFiles = new Map(); // 本次会话里的本地文件
+  let audioDB = null;
+  let objectUrl = null;
+
+  function withTimeout(promise, ms) {
+    return Promise.race([
+      promise,
+      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms)),
+    ]);
+  }
+
+  function openAudioDB() {
+    if (!('indexedDB' in window)) return Promise.reject(new Error('浏览器不支持 IndexedDB'));
+    if (!audioDB) {
+      audioDB = new Promise((resolve, reject) => {
+        const request = indexedDB.open(AUDIO_DB, 1);
+        request.onupgradeneeded = () => {
+          const db = request.result;
+          if (!db.objectStoreNames.contains(AUDIO_STORE)) db.createObjectStore(AUDIO_STORE);
+        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+    }
+    return audioDB;
+  }
+
+  async function saveAudioFile(id, file) {
+    const db = await openAudioDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(AUDIO_STORE, 'readwrite');
+      tx.objectStore(AUDIO_STORE).put(file, id);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+
+  async function loadAudioFile(id) {
+    const db = await openAudioDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(AUDIO_STORE, 'readonly');
+      const request = tx.objectStore(AUDIO_STORE).get(id);
+      request.onsuccess = () => resolve(request.result || null);
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  function deleteAudioFile(id) {
+    return openAudioDB()
+      .then((db) => new Promise((resolve) => {
+        const tx = db.transaction(AUDIO_STORE, 'readwrite');
+        tx.objectStore(AUDIO_STORE).delete(id);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => resolve();
+      }))
+      .catch(() => {});
+  }
+
+  function clearAudioFiles() {
+    return openAudioDB()
+      .then((db) => new Promise((resolve) => {
+        const tx = db.transaction(AUDIO_STORE, 'readwrite');
+        tx.objectStore(AUDIO_STORE).clear();
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => resolve();
+      }))
+      .catch(() => {});
+  }
+
+  /** 把 track.src 解析成能直接塞给 audio 的地址；返回 null 表示需要用户重新选文件 */
+  async function resolveTrackSource(track) {
+    if (objectUrl) {
+      URL.revokeObjectURL(objectUrl);
+      objectUrl = null;
+    }
+
+    const src = track && track.src ? String(track.src) : '';
+    if (!src) return PLACEHOLDER;
+
+    // 本次会话里选的文件
+    if (src.startsWith('local:')) {
+      const file = localFiles.get(src.slice(6));
+      if (!file) return null;
+      objectUrl = URL.createObjectURL(file);
+      return objectUrl;
+    }
+
+    // 存在浏览器数据库里的文件
+    if (src.startsWith('idb:')) {
+      try {
+        const file = await withTimeout(loadAudioFile(src.slice(4)), DB_TIMEOUT);
+        if (!file) return null;
+        objectUrl = URL.createObjectURL(file);
+        return objectUrl;
+      } catch (err) {
+        return null;
+      }
+    }
+
+    return src;
+  }
+
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   const cards = [];
@@ -346,7 +454,9 @@
         return;
       }
       if (event.target.closest('[data-reset]')) {
+        clearAudioFiles();
         localStorage.removeItem(STORE_KEY);
+        localStorage.removeItem(`${STORE_KEY}_ver`);
         location.reload();
       }
     });
@@ -397,7 +507,8 @@
     const ok = await confirmModal(`删除专辑《${album.title}》？`, '这张专辑和它下面的曲目都会被移除。');
     if (!ok) return;
 
-    albums.splice(index, 1);
+    const [removed] = albums.splice(index, 1);
+    (removed && removed.tracks ? removed.tracks : []).forEach(releaseTrackFile);
 
     if (current.album === index) resetPlayer();
     else if (current.album > index) current.album -= 1;
@@ -527,56 +638,142 @@
     markTracks();
   }
 
-  function openTrackForm(albumIndex) {
+  function openTrackForm(albumIndex, options = {}) {
     const album = albums[albumIndex];
     if (!album) return;
+
+    const replaceIndex = Number.isInteger(options.replaceIndex) ? options.replaceIndex : null;
+    const editing = replaceIndex != null ? album.tracks[replaceIndex] : null;
 
     const modal = document.createElement('div');
     modal.className = 'mini-modal';
     modal.innerHTML = `
       <div class="mini-mask" data-close></div>
       <form class="mini-panel" novalidate>
-        <h3>添加歌曲</h3>
-        <p class="mini-text">添加到《${escapeHtml(album.title)}》</p>
+        <h3>${editing ? '重新选择文件' : '添加歌曲'}</h3>
+        <p class="mini-text">${editing ? '原来的文件已失效，重新选一首并覆盖它' : `添加到《${escapeHtml(album.title)}》`}</p>
+        <label class="mini-field">
+          <span>音频文件</span>
+          <input id="trackFile" type="file" accept="audio/*,.mp3,.flac,.m4a,.wav,.ogg,.opus">
+          <span class="cover-hint" id="trackFileHint">从电脑里选一首（mp3 / flac / m4a / wav）；不选则用演示音频</span>
+        </label>
         <label class="mini-field">
           <span>歌曲名</span>
-          <input id="trackTitle" maxlength="40" placeholder="例如：Blue Lantern">
+          <input id="trackTitle" maxlength="40" placeholder="选文件后自动填入" value="${editing ? escapeHtml(editing.title) : ''}">
         </label>
         <label class="mini-field">
           <span>时长</span>
-          <input id="trackDuration" maxlength="6" placeholder="选填，例如 3:45">
+          <input id="trackDuration" maxlength="6" placeholder="自动读取，也可手填 3:45" value="${editing && editing.duration !== '--:--' ? escapeHtml(editing.duration) : ''}">
         </label>
         <div class="mini-actions">
           <button type="button" class="mini-btn ghost" data-close>取消</button>
-          <button type="submit" class="mini-btn primary">添加</button>
+          <button type="submit" class="mini-btn primary">${editing ? '替换' : '添加'}</button>
         </div>
       </form>
     `;
     document.body.appendChild(modal);
 
     const form = modal.querySelector('form');
-    modal.querySelector('#trackTitle').focus();
+    const fileInput = modal.querySelector('#trackFile');
+    const titleInput = modal.querySelector('#trackTitle');
+    const durationInput = modal.querySelector('#trackDuration');
+    const fileHint = modal.querySelector('#trackFileHint');
+
+    titleInput.focus();
     modal.addEventListener('click', (event) => {
       if (event.target.closest('[data-close]')) modal.remove();
     });
 
-    form.addEventListener('submit', (event) => {
+    fileInput.addEventListener('change', async () => {
+      const file = fileInput.files && fileInput.files[0];
+      if (!file) return;
+
+      fileHint.textContent = `${file.name} · ${(file.size / 1024 / 1024).toFixed(1)} MB`;
+      if (!titleInput.value.trim()) titleInput.value = titleFromFileName(file.name);
+
+      const duration = await probeAudioDuration(file);
+      if (duration) durationInput.value = duration;
+    });
+
+    form.addEventListener('submit', async (event) => {
       event.preventDefault();
 
-      const title = modal.querySelector('#trackTitle').value.trim();
+      const file = fileInput.files && fileInput.files[0];
+      const title = titleInput.value.trim() || (file ? titleFromFileName(file.name) : '');
       if (!title) {
-        modal.querySelector('#trackTitle').focus();
+        titleInput.focus();
         return;
       }
 
-      const duration = modal.querySelector('#trackDuration').value.trim() || '--:--';
-      album.tracks.push({ title, duration });
+      const track = {
+        title,
+        duration: durationInput.value.trim() || '--:--',
+      };
+
+      if (file) {
+        const id = 'f' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+        localFiles.set(id, file);
+        track.src = 'local:' + id;
+
+        // 能存进 IndexedDB 就存（http/https 下刷新后还能播）
+        try {
+          await withTimeout(saveAudioFile(id, file), DB_TIMEOUT);
+          track.src = 'idb:' + id;
+        } catch (err) {
+          /* file:// 或浏览器禁用数据库时，仅本次会话可用 */
+        }
+      }
+
+      if (replaceIndex != null && album.tracks[replaceIndex]) {
+        const old = album.tracks[replaceIndex];
+        if (String(old.src || '').startsWith('idb:')) deleteAudioFile(String(old.src).slice(4));
+        album.tracks[replaceIndex] = track;
+      } else {
+        album.tracks.push(track);
+      }
 
       saveAlbums();
       modal.remove();
       renderTracks(albumIndex);
       updateViewSub(albumIndex);
-      toast('已添加歌曲');
+      toast(
+        file
+          ? (track.src.startsWith('idb:') ? '已添加并存入本地' : '已添加（刷新页面后需重新选择文件）')
+          : '已添加歌曲'
+      );
+    });
+  }
+
+  /** 从文件名猜歌名：去掉序号和结尾的「 - 歌手」 */
+  function titleFromFileName(name) {
+    const base = name.replace(/\.[^.]+$/, '');
+    return base
+      .replace(/^\s*\d{1,3}[\s._-]+/, '')
+      .replace(/\s*-\s*[^-]+$/, '')
+      .trim() || base;
+  }
+
+  /** 读一段音频的时长，读不到就返回空 */
+  function probeAudioDuration(file) {
+    return new Promise((resolve) => {
+      const url = URL.createObjectURL(file);
+      const probe = new Audio();
+      let settled = false;
+
+      const finish = (value) => {
+        if (settled) return;
+        settled = true;
+        URL.revokeObjectURL(url);
+        resolve(value);
+      };
+
+      probe.preload = 'metadata';
+      probe.addEventListener('loadedmetadata', () => {
+        finish(Number.isFinite(probe.duration) ? formatTime(probe.duration) : '');
+      });
+      probe.addEventListener('error', () => finish(''));
+      setTimeout(() => finish(''), 4000);
+      probe.src = url;
     });
   }
 
@@ -584,7 +781,8 @@
     const album = albums[albumIndex];
     if (!album || !album.tracks[trackIndex]) return;
 
-    album.tracks.splice(trackIndex, 1);
+    const [removed] = album.tracks.splice(trackIndex, 1);
+    releaseTrackFile(removed);
 
     if (current.album === albumIndex) {
       if (current.track === trackIndex) resetPlayer();
@@ -595,6 +793,13 @@
     renderTracks(albumIndex);
     updateViewSub(albumIndex);
     toast('已删除歌曲');
+  }
+
+  /** 删歌/删专辑时顺手清掉存在浏览器里的文件 */
+  function releaseTrackFile(track) {
+    const src = String((track && track.src) || '');
+    if (src.startsWith('idb:')) deleteAudioFile(src.slice(4));
+    if (src.startsWith('local:')) localFiles.delete(src.slice(6));
   }
 
   function markTracks() {
@@ -615,6 +820,10 @@
     audio.pause();
     audio.removeAttribute('src');
     audio.load();
+    if (objectUrl) {
+      URL.revokeObjectURL(objectUrl);
+      objectUrl = null;
+    }
     current.album = -1;
     current.track = -1;
     player.classList.remove('is-on');
@@ -624,18 +833,23 @@
     totalTime.textContent = '0:00';
   }
 
-  function playTrack(albumIndex, trackIndex) {
+  async function playTrack(albumIndex, trackIndex) {
     const album = albums[albumIndex];
     const track = album && album.tracks[trackIndex];
     if (!track) return;
+
+    // 本地文件要先取出来转成临时地址；取不到说明文件丢了，引导重新选择
+    const source = await resolveTrackSource(track);
+    if (!source) {
+      toast('这个本地文件需要重新选择（刷新页面或清理浏览器后失效）');
+      openTrackForm(albumIndex, { replaceIndex: trackIndex });
+      return;
+    }
 
     current.album = albumIndex;
     current.track = trackIndex;
 
     document.documentElement.style.setProperty('--accent', album.accent || DEFAULT_ACCENT);
-
-    audio.src = track.src || PLACEHOLDER;
-    audio.currentTime = 0;
 
     playerCover.src = album.cover;
     playerCover.alt = '';
@@ -648,6 +862,9 @@
       void player.offsetWidth; // 强制回流，保证滑入过渡生效
       player.classList.add('is-on');
     }
+
+    audio.src = source;
+    audio.currentTime = 0;
 
     audio.play().catch(() => {
       /* 少数浏览器会拦截自动播放，用户再点一次播放键即可 */
