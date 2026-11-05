@@ -1,4 +1,4 @@
-/* =========================================================
+﻿/* =========================================================
    album.css — 环绕专辑页
    背景层 / HUD / 书页式专辑堆 / 专辑详情 / 曲目 / 播放器
    ========================================================= */
@@ -174,7 +174,7 @@ body::after {
 .marquee-track {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 0;
   height: 100%;
   will-change: transform;
 }
@@ -182,21 +182,23 @@ body::after {
 
 /* --loop 由脚本按重复份数写入，保证无缝衔接 */
 @keyframes marquee-se {
-  from { transform: translateX(calc(-1 * var(--loop, 50%))); }
+  from { transform: translateX(calc(-1 * var(--loop, 0px))); }
   to { transform: translateX(0); }
 }
 @keyframes marquee-nw {
   from { transform: translateX(0); }
-  to { transform: translateX(calc(-1 * var(--loop, 50%))); }
+  to { transform: translateX(calc(-1 * var(--loop, 0px))); }
 }
 
-/* 16:9 的图片条 */
+/* 16:9 的图片条；间距用 margin 而不是 flex gap，
+   这样每张的占位宽度固定，整条宽度正好是「一份内容」的整数倍，循环才不会跳 */
 .marquee-item {
   position: relative;
   pointer-events: auto;
   height: 100%;
   aspect-ratio: 16 / 9;
   flex: 0 0 auto;
+  margin-right: 16px;
   overflow: hidden;
   border-radius: 10px;
   background: rgba(10, 12, 18, 0.6);
@@ -204,7 +206,6 @@ body::after {
   opacity: 1;
   transition: opacity 0.3s;
 }
-.marquee-item { opacity: 1; }
 .marquee-item img {
   width: 100%;
   height: 100%;
@@ -877,6 +878,7 @@ body::after {
   /* 环形仍保持旋转，但放慢到 1/4；否则会被压成 0.01ms 变成闪烁 */
   .ring { animation-duration: 205.6s !important; }
 }
+
 
 
 

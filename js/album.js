@@ -1,4 +1,4 @@
-﻿/* =========================================================
+/* =========================================================
    album.js — 环绕专辑交互
    环形旋转 / 悬停暂停并翻开 / 增删专辑与曲目 / 播放器 / 背景切换
    ========================================================= */
@@ -1152,8 +1152,16 @@
         order.forEach((index) => items.push(item(index)));
       }
 
-      track.style.setProperty('--loop', `${(100 / copies).toFixed(4)}%`);
       track.innerHTML = items.join('');
+
+      // 位移量用「一份内容的真实像素宽度」，这样循环点严丝合缝，不会跳
+      const first = track.querySelector('.marquee-item');
+      if (first) {
+        const itemW = first.offsetWidth;
+        const margin = parseFloat(getComputedStyle(first).marginRight) || 0;
+        const period = count * (itemW + margin);
+        track.style.setProperty('--loop', `${period.toFixed(2)}px`);
+      }
     });
   }
 
