@@ -9,3 +9,7 @@ node_modules/
 audio/源/
 audio/*/
 专辑/
+
+# 本地工具链，与网页无关，不纳入版本库
+ncmdump/
+vcpkg/
