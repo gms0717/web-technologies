@@ -1,4 +1,4 @@
-﻿/* =========================================================
+/* =========================================================
    album.css — 环绕专辑页
    背景层 / HUD / 书页式专辑堆 / 专辑详情 / 曲目 / 播放器
    ========================================================= */
@@ -414,8 +414,8 @@ body::after {
   pointer-events: none;
   transition: opacity 0.2s ease 0.04s;
 }
-.fab:hover,
-.fab:focus-within {
+/* 展开状态：桌面靠 hover，触屏靠 JS 切换 .is-open */
+.fab.is-open {
   width: 132px;
   height: 132px;
   border-radius: 26px;
@@ -424,12 +424,30 @@ body::after {
   border-color: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(14px);
 }
-.fab:hover .fab-plus,
-.fab:focus-within .fab-plus { opacity: 0; }
-.fab:hover .fab-actions,
-.fab:focus-within .fab-actions {
+.fab.is-open .fab-plus { opacity: 0; }
+.fab.is-open .fab-actions {
   opacity: 1;
   pointer-events: auto;
+}
+
+@media (hover: hover) {
+  .fab:hover,
+  .fab:focus-within {
+    width: 132px;
+    height: 132px;
+    border-radius: 26px;
+    opacity: 1;
+    background: rgba(14, 16, 22, 0.92);
+    border-color: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(14px);
+  }
+  .fab:hover .fab-plus,
+  .fab:focus-within .fab-plus { opacity: 0; }
+  .fab:hover .fab-actions,
+  .fab:focus-within .fab-actions {
+    opacity: 1;
+    pointer-events: auto;
+  }
 }
 
 /* 两个长方形：内圈在上、外圈在下，各占一半，把方形填满 */
@@ -869,6 +887,98 @@ body::after {
   .player-text { width: 140px; }
 }
 
+/* ---------------- 手机（竖屏） ---------------- */
+@media (max-width: 760px) {
+  body {
+    min-width: 0;
+  }
+
+  .stage {
+    height: 100vh;
+    height: 100dvh;
+    perspective: 1200px;
+  }
+
+  /* 顶部信息收紧，避免和背景切换按钮挤在一起 */
+  .hud { padding: 16px 16px 0; }
+  .kicker { font-size: 10px; letter-spacing: 4px; }
+  .brand h1 { margin-top: 4px; font-size: 22px; letter-spacing: 2px; }
+  .brand .hint { display: none; }
+  .bg-switch { gap: 7px; padding: 6px 9px; }
+  .bg-dot { width: 20px; height: 20px; }
+  .bg-upload { width: 20px; height: 20px; font-size: 12px; }
+
+  /* 两圈错位收窄，避免超出屏幕 */
+  .ring--outer { --shift: 26px; }
+  .ring--inner { --shift: -43px; }
+
+  /* 轮播条变矮，贴住上下边缘 */
+  .marquee { height: 92px; }
+  .marquee--top { top: calc(11% - 46px); }
+  .marquee--bottom { top: calc(89% - 46px); }
+  .marquee-item { margin-right: 10px; border-radius: 8px; }
+  .marquee-add { width: 26px; height: 26px; font-size: 13px; }
+  .marquee-add--left { left: 14px; bottom: 14px; }
+  .marquee-add--right { right: 14px; top: 74px; }
+
+  /* 详情：方形卡片占满宽度 */
+  .view-panel {
+    width: min(94vw, 88vmin);
+    border-radius: 20px;
+  }
+  .view-content { padding: 20px 18px 16px; }
+  .view-title { font-size: 23px; }
+  .view-sub { margin-top: 6px; font-size: 12px; }
+  .view-actions { margin: 12px 0 2px; }
+  .play-album { height: 34px; padding: 0 16px; font-size: 12px; }
+  .view-close { top: 12px; right: 12px; width: 30px; height: 30px; font-size: 13px; }
+
+  /* 小卡片上文字更紧凑，避免标题被裁掉 */
+  .album-meta { padding: 18px 8px 7px; }
+  .album-meta strong { font-size: 10px; letter-spacing: 0.5px; }
+  .album-meta em { display: none; }
+  .track-list { margin-top: 10px; }
+  .track { grid-template-columns: 24px minmax(0, 1fr) 16px 40px; gap: 8px; padding: 8px 10px; }
+  .track-name { font-size: 13px; }
+  .track-index, .track-time { font-size: 11px; }
+
+  /* 播放器改成两行：第一行封面+信息+控制，第二行进条 */
+  .player {
+    bottom: 10px;
+    flex-wrap: wrap;
+    gap: 8px 10px;
+    width: calc(100vw - 20px);
+    padding: 10px 12px;
+    border-radius: 16px;
+  }
+  .player-cover { width: 38px; height: 38px; border-radius: 8px; }
+  .player-text { flex: 1 1 0; width: auto; min-width: 0; }
+  .player-controls { order: 3; }
+  .ctrl { width: 30px; height: 30px; }
+  .ctrl.is-main { width: 34px; height: 34px; }
+  .player-progress { order: 4; flex: 1 0 100%; min-width: 0; }
+  .progress-time { font-size: 10px; }
+
+  /* 新增按钮上移，避开播放器 */
+  .fab { right: 16px; bottom: 96px; }
+  .fab.is-open,
+  .fab:hover,
+  .fab:focus-within {
+    width: 112px;
+    height: 112px;
+    border-radius: 22px;
+  }
+  .fab-btn { font-size: 12px; letter-spacing: 1px; }
+}
+
+/* 触屏没有 hover：删除按钮不再依赖悬停 */
+@media (hover: none) {
+  .album-remove { opacity: 0.7; transform: none; }
+  .track-remove { opacity: 0.6; transform: translateY(-50%); }
+  .marquee-remove { opacity: 0.85; pointer-events: auto; }
+  .marquee-item { opacity: 1; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -878,6 +988,10 @@ body::after {
   /* 环形仍保持旋转，但放慢到 1/4；否则会被压成 0.01ms 变成闪烁 */
   .ring { animation-duration: 205.6s !important; }
 }
+
+
+
+
 
 
 

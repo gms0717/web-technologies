@@ -1,4 +1,4 @@
-/* =========================================================
+﻿/* =========================================================
    album.js — 环绕专辑交互
    环形旋转 / 悬停暂停并翻开 / 增删专辑与曲目 / 播放器 / 背景切换
    ========================================================= */
@@ -252,6 +252,8 @@
       baseRadius: 445,
       maxCard: 190,
       widthRatio: 0.31,
+      mobileCard: 92,
+      mobileRatio: 0.37,
     },
     inner: {
       el: document.getElementById('ringInner'),
@@ -263,6 +265,8 @@
       baseRadius: 210,
       maxCard: 152,
       widthRatio: 0.16,
+      mobileCard: 68,
+      mobileRatio: 0.19,
     },
   };
 
@@ -272,14 +276,20 @@
     if (!count) return;
 
     const stageW = stage.clientWidth || window.innerWidth;
-    const radiusMax = Math.min(ring.baseRadius, stageW * ring.widthRatio);
+    // 手机上整体缩小并换成更紧凑的比例，避免两圈超出窄屏
+    const mobile = stageW < 760;
+    const cardMax = mobile ? ring.mobileCard : ring.maxCard;
+    const radiusMax = Math.min(
+      ring.baseRadius * (mobile ? 0.82 : 1),
+      stageW * (mobile ? ring.mobileRatio : ring.widthRatio)
+    );
 
-    let radius = (count * (ring.maxCard + GAP)) / (2 * Math.PI);
+    let radius = (count * (cardMax + GAP)) / (2 * Math.PI);
     radius = Math.min(radiusMax, Math.max(radius, radiusMax * 0.88));
 
     // 半径被压住时按弧长缩小封面
     const arc = (2 * Math.PI * radius) / count;
-    const card = Math.min(ring.maxCard, Math.max(44, arc - GAP));
+    const card = Math.min(cardMax, Math.max(36, arc - GAP));
 
     ring.el.style.setProperty('--card', `${card.toFixed(1)}px`);
     ring.el.style.setProperty('--radius', `${radius.toFixed(1)}px`);
@@ -1246,9 +1256,19 @@
   /* ---------------- 启动 ---------------- */
   fab.addEventListener('click', (event) => {
     const btn = event.target.closest('.fab-btn');
-    if (!btn) return;
-    openAlbumForm(btn.dataset.ring === 'inner' ? 'inner' : 'outer');
+    if (btn) {
+      openAlbumForm(btn.dataset.ring === 'inner' ? 'inner' : 'outer');
+      fab.classList.remove('is-open');
+      return;
+    }
+    // 触屏没有 hover：点一下展开 / 收起
+    fab.classList.toggle('is-open');
   });
+
+  document.addEventListener('click', (event) => {
+    if (!fab.contains(event.target)) fab.classList.remove('is-open');
+  });
+
   window.addEventListener('resize', () => {
     Object.values(RINGS).forEach(layoutRing);
   });
@@ -1256,6 +1276,7 @@
   renderRings();
   renderMarquees();
 })();
+
 
 
 
