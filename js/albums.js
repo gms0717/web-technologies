@@ -1,8 +1,8 @@
 /**
  * 由 tools/apply-export.mjs / tools/attach-audio.mjs 生成，请勿手改。
- * 生成时间：2026-11-08T13:30:07.375Z
+ * 生成时间：2026-11-08T13:39:43.581Z
  */
-window.ALBUMS_VERSION = "2026-11-08T13:30:07.375Z";
+window.ALBUMS_VERSION = "2026-11-08T13:39:43.581Z";
 
 window.ALBUMS = [
   {
@@ -40,7 +40,8 @@ window.ALBUMS = [
       },
       {
         "title": "等我回家",
-        "duration": "4:57"
+        "duration": "4:57",
+        "src": "audio/等我回家-薛之谦.mp3"
       },
       {
         "title": "我想起你了",
