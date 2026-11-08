@@ -1152,6 +1152,8 @@
   function applyBackground(css) {
     const next = layers[1 - layerIndex];
     next.style.background = css;
+    // 照片背景额外压一层暗色，纯渐变不需要
+    next.classList.toggle('is-photo', /url\(/i.test(css));
     next.classList.add('is-on');
     layers[layerIndex].classList.remove('is-on');
     layerIndex = 1 - layerIndex;
@@ -1171,7 +1173,7 @@
   }
 
   function restoreBackground() {
-    // 优先恢复用户上传的自定义背景
+    // 优先恢复用户自己选过 / 上传过的背景
     try {
       const custom = localStorage.getItem('album_bg_image');
       if (custom) {
@@ -1181,11 +1183,24 @@
       }
     } catch (err) { /* 忽略 */ }
 
-    let saved = 0;
+    let saved = null;
     try {
-      const raw = Number(localStorage.getItem('album_bg'));
-      if (Number.isInteger(raw) && raw >= 0 && raw < BACKGROUNDS.length) saved = raw;
+      const raw = localStorage.getItem('album_bg');
+      if (raw !== null) {
+        const value = Number(raw);
+        if (Number.isInteger(value) && value >= 0 && value < BACKGROUNDS.length) saved = value;
+      }
     } catch (err) { /* 忽略 */ }
+
+    // 本地没选过就用数据文件里的默认背景
+    if (saved === null) {
+      if (window.DEFAULT_BG_IMAGE) {
+        applyBackground(window.DEFAULT_BG_IMAGE);
+        return;
+      }
+      saved = Number.isInteger(window.DEFAULT_BG) ? window.DEFAULT_BG : 0;
+    }
+
     setPreset(saved, false);
   }
 
@@ -1233,6 +1248,11 @@
       }
     } catch (err) {
       /* 数据损坏就用默认图 */
+    }
+
+    // 数据文件里带有默认轮播图就用它（由 tools/apply-export.mjs 生成）
+    if (Array.isArray(window.DEFAULT_BANNERS) && window.DEFAULT_BANNERS.length) {
+      return window.DEFAULT_BANNERS.slice();
     }
     return DEFAULT_BANNERS.slice();
   }

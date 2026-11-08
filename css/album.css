@@ -52,6 +52,17 @@ img { display: block; max-width: 100%; }
 }
 .bg-layer.is-on { opacity: 1; }
 
+/* 自定义照片背景压一层暗色，保证文字和封面看得清 */
+.bg-layer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 6, 10, 0);
+  transition: background-color 0.4s ease;
+  pointer-events: none;
+}
+.bg-layer.is-photo::after { background: rgba(5, 6, 10, 0.45); }
+
 /* 四周暗角，视线集中在专辑上 */
 body::after {
   content: "";
