@@ -1,4 +1,4 @@
-﻿/* =========================================================
+/* =========================================================
    album.js — 环绕专辑交互
    环形旋转 / 悬停暂停并翻开 / 增删专辑与曲目 / 播放器 / 背景切换
    ========================================================= */
@@ -475,6 +475,96 @@
     });
   }
 
+  /* ---------------- 导出 / 导入数据 ---------------- */
+  /** 把当前设置（专辑、轮播图、背景）导出成 JSON；浏览器里的本地音频不包含 */
+  function exportData() {
+    const exportAlbums = albums.map((album) => ({
+      ...album,
+      tracks: album.tracks.map((track) => {
+        const src = String(track.src || '');
+        if (!src || /^(idb|local|blob):/.test(src)) {
+          const copy = { ...track };
+          delete copy.src; // 只存在这台浏览器里的音频，导出去也放不了
+          return copy;
+        }
+        return { ...track };
+      }),
+    }));
+
+    let bgImage = null;
+    let bgPreset = 0;
+    try {
+      bgImage = localStorage.getItem('album_bg_image');
+      const raw = Number(localStorage.getItem('album_bg'));
+      if (Number.isInteger(raw) && raw >= 0) bgPreset = raw;
+    } catch (err) { /* 忽略 */ }
+
+    const payload = {
+      app: 'album-ring',
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      albums: exportAlbums,
+      banners,
+      bgPreset,
+      bgImage,
+    };
+
+    const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `album-data-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+    toast('已导出 JSON（本地音频不包含在内）');
+  }
+
+  /** 读入导出的 JSON，覆盖当前设置并刷新 */
+  function importData() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/json,.json';
+
+    input.addEventListener('change', async () => {
+      const file = input.files && input.files[0];
+      if (!file) return;
+
+      try {
+        const data = JSON.parse(await file.text());
+        if (!Array.isArray(data.albums) || !data.albums.length) throw new Error('缺少 albums');
+
+        localStorage.setItem(STORE_KEY, JSON.stringify(data.albums));
+        // 避免数据文件版本号不一致，把刚导入的内容清掉
+        if (window.ALBUMS_VERSION) {
+          localStorage.setItem(`${STORE_KEY}_ver`, window.ALBUMS_VERSION);
+        } else {
+          localStorage.removeItem(`${STORE_KEY}_ver`);
+        }
+
+        if (Array.isArray(data.banners)) {
+          localStorage.setItem(BANNERS_KEY, JSON.stringify(data.banners));
+        }
+        if (Number.isInteger(data.bgPreset)) {
+          localStorage.setItem('album_bg', String(data.bgPreset));
+        }
+        if (data.bgImage) {
+          localStorage.setItem('album_bg_image', data.bgImage);
+        } else {
+          localStorage.removeItem('album_bg_image');
+        }
+
+        toast('已导入，正在刷新…');
+        setTimeout(() => location.reload(), 600);
+      } catch (err) {
+        toast('导入失败：文件格式不对');
+      }
+    });
+
+    input.click();
+  }
+
   /* ---------------- 新增 / 删除专辑 ---------------- */
   function openAlbumForm(ringKey = 'outer') {
     const ringName = ringKey === 'inner' ? '内圈' : '外圈';
@@ -499,7 +589,11 @@
           <span class="cover-hint">不选则使用渐变占位封面</span>
         </label>
         <div class="mini-actions">
-          <button type="button" class="mini-btn ghost" data-reset>恢复默认</button>
+          <span class="mini-links">
+            <button type="button" class="mini-link" data-export>导出</button>
+            <button type="button" class="mini-link" data-import>导入</button>
+            <button type="button" class="mini-link" data-reset>恢复默认</button>
+          </span>
           <button type="button" class="mini-btn ghost" data-close>取消</button>
           <button type="submit" class="mini-btn primary">添加</button>
         </div>
@@ -515,10 +609,19 @@
         modal.remove();
         return;
       }
+      if (event.target.closest('[data-export]')) {
+        exportData();
+        return;
+      }
+      if (event.target.closest('[data-import]')) {
+        importData();
+        return;
+      }
       if (event.target.closest('[data-reset]')) {
         clearAudioFiles();
         localStorage.removeItem(STORE_KEY);
         localStorage.removeItem(`${STORE_KEY}_ver`);
+        localStorage.removeItem('album_bg_image');
         location.reload();
       }
     });
@@ -1060,11 +1163,24 @@
     applyBackground(preset.css);
     dots.forEach((dot, i) => dot.classList.toggle('is-active', i === index));
     if (persist) {
-      try { localStorage.setItem('album_bg', String(index)); } catch (err) { /* 忽略 */ }
+      try {
+        localStorage.setItem('album_bg', String(index));
+        localStorage.removeItem('album_bg_image');
+      } catch (err) { /* 忽略 */ }
     }
   }
 
   function restoreBackground() {
+    // 优先恢复用户上传的自定义背景
+    try {
+      const custom = localStorage.getItem('album_bg_image');
+      if (custom) {
+        applyBackground(custom);
+        dots.forEach((dot) => dot.classList.remove('is-active'));
+        return;
+      }
+    } catch (err) { /* 忽略 */ }
+
     let saved = 0;
     try {
       const raw = Number(localStorage.getItem('album_bg'));
@@ -1079,8 +1195,10 @@
 
     const reader = new FileReader();
     reader.addEventListener('load', () => {
-      applyBackground(`url("${reader.result}") center / cover no-repeat`);
+      const css = `url("${reader.result}") center / cover no-repeat`;
+      applyBackground(css);
       dots.forEach((dot) => dot.classList.remove('is-active'));
+      try { localStorage.setItem('album_bg_image', css); } catch (err) { /* 容量不足就算了 */ }
     });
     reader.readAsDataURL(file);
     bgFile.value = '';
