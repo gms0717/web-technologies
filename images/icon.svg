@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#191a26"/><stop offset="1" stop-color="#05060a"/></linearGradient>
+    <linearGradient id="front" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff7ab8"/><stop offset="0.55" stop-color="#c084fc"/><stop offset="1" stop-color="#6d4bff"/></linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#ff4fa3" stop-opacity="0.5"/><stop offset="0.6" stop-color="#a855f7" stop-opacity="0.16"/><stop offset="1" stop-color="#ff4fa3" stop-opacity="0"/></radialGradient>
+    <linearGradient id="38e1ffgrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#38e1ff"/><stop offset="1" stop-color="#2a6bd6"/></linearGradient>
+    <linearGradient id="ffc46bgrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffc46b"/><stop offset="1" stop-color="#d4583c"/></linearGradient>
+    <linearGradient id="8b5cf6grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8b5cf6"/><stop offset="1" stop-color="#4c1d95"/></linearGradient>
+    <linearGradient id="5b6bffgrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5b6bff"/><stop offset="1" stop-color="#1e3a8a"/></linearGradient>
+    <linearGradient id="ff8fc7grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff8fc7"/><stop offset="1" stop-color="#a855f7"/></linearGradient>
+    <linearGradient id="7dd3fcgrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7dd3fc"/><stop offset="1" stop-color="#3b82f6"/></linearGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="113" fill="url(#bg)"/>
+  <ellipse cx="256.0" cy="268" rx="196" ry="132" fill="url(#glow)"/>
+
+  <!-- 外圈轨道 -->
+  <ellipse cx="256.0" cy="268" rx="188" ry="86" fill="none" stroke="#ffffff" stroke-opacity="0.2" stroke-width="3.5"/>
+  <!-- 内圈轨道 -->
+  <ellipse cx="256.0" cy="268" rx="116" ry="54" fill="none" stroke="#ffffff" stroke-opacity="0.13" stroke-width="2.5"/>
+
+  <!-- 外圈专辑卡 -->
+    <g transform="rotate(-4 72.1 285.9)"><rect x="41.1" y="254.9" width="62" height="62" rx="13.6" fill="url(#38e1ffgrad)" opacity="0.92"/></g>
+    <g transform="rotate(4 439.9 285.9)"><rect x="408.9" y="254.9" width="62" height="62" rx="13.6" fill="url(#ffc46bgrad)" opacity="0.92"/></g>
+    <g transform="rotate(-4 236.3 353.5)"><rect x="212.3" y="329.5" width="48" height="48" rx="10.6" fill="url(#8b5cf6grad)" opacity="0.6"/></g>
+    <g transform="rotate(-4 197.9 186.2)"><rect x="173.9" y="162.2" width="48" height="48" rx="10.6" fill="url(#5b6bffgrad)" opacity="0.55"/></g>
+
+  <!-- 内圈专辑卡 -->
+    <g transform="rotate(0.0 151.7 244.3)"><rect x="129.7" y="222.3" width="44" height="44" rx="9.7" fill="url(#ff8fc7grad)" opacity="0.75"/></g>
+    <g transform="rotate(0.0 360.3 244.3)"><rect x="338.3" y="222.3" width="44" height="44" rx="9.7" fill="url(#7dd3fcgrad)" opacity="0.7"/></g>
+
+  <!-- 正面的主封面 -->
+  <rect x="184" y="196" width="144" height="144" rx="30" fill="url(#front)"/>
+  <circle cx="256" cy="268" r="46" fill="#0b0c12" opacity="0.62"/>
+  <circle cx="256" cy="268" r="30" fill="none" stroke="#ffffff" stroke-opacity="0.12" stroke-width="2"/>
+  <circle cx="256" cy="268" r="7" fill="#ff5fae"/>
+</svg>
