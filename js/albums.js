@@ -1,9 +1,8 @@
 /**
- * 由 tools/apply-export.mjs 从导出的数据生成，请勿手改。
- * 来源：D:/应用/album-data-2026-11-08.json
- * 生成时间：2026-11-08T09:13:31.941Z
+ * 由 tools/apply-export.mjs / tools/attach-audio.mjs 生成，请勿手改。
+ * 生成时间：2026-11-08T13:30:07.375Z
  */
-window.ALBUMS_VERSION = "2026-11-08T09:13:31.941Z";
+window.ALBUMS_VERSION = "2026-11-08T13:30:07.375Z";
 
 window.ALBUMS = [
   {
@@ -16,7 +15,8 @@ window.ALBUMS = [
     "tracks": [
       {
         "title": "其实",
-        "duration": "4:02"
+        "duration": "4:02",
+        "src": "audio/其实-薛之谦.mp3"
       },
       {
         "title": "丑八怪",
