@@ -481,17 +481,19 @@ body::after {
 /* 专辑右上角的删除：悬停才浮现 */
 .album-remove {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: -4px;
+  right: -4px;
   z-index: 3;
   display: grid;
   place-items: center;
-  width: 22px;
-  height: 22px;
+  /* 跟着卡片缩放，并且贴在角上，避免小卡片时盖住封面中心（挡住点击） */
+  width: clamp(15px, 30%, 22px);
+  height: auto;
+  aspect-ratio: 1;
   border-radius: 50%;
   background: rgba(10, 10, 14, 0.72);
   color: rgba(255, 255, 255, 0.72);
-  font-size: 11px;
+  font-size: 10px;
   line-height: 1;
   opacity: 0;
   transform: scale(0.9);

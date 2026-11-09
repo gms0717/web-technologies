@@ -1,8 +1,8 @@
 /**
  * 由 tools/apply-export.mjs / tools/attach-audio.mjs 生成，请勿手改。
- * 生成时间：2026-11-09T02:33:11.931Z
+ * 生成时间：2026-11-09T02:36:53.350Z
  */
-window.ALBUMS_VERSION = "2026-11-09T02:33:11.931Z";
+window.ALBUMS_VERSION = "2026-11-09T02:36:53.350Z";
 
 window.ALBUMS = [
   {
@@ -361,7 +361,13 @@ window.ALBUMS = [
     "year": 2026,
     "accent": "#c084fc",
     "cover": "images/albums/up-12.jpg",
-    "tracks": [],
+    "tracks": [
+      {
+        "title": "天份",
+        "duration": "4:08",
+        "src": "audio/天份-薛之谦.mp3"
+      }
+    ],
     "ring": "inner"
   },
   {
