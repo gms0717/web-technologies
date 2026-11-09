@@ -1,8 +1,8 @@
 /**
  * 由 tools/apply-export.mjs / tools/attach-audio.mjs 生成，请勿手改。
- * 生成时间：2026-11-09T02:28:03.298Z
+ * 生成时间：2026-11-09T02:33:11.931Z
  */
-window.ALBUMS_VERSION = "2026-11-09T02:28:03.298Z";
+window.ALBUMS_VERSION = "2026-11-09T02:33:11.931Z";
 
 window.ALBUMS = [
   {
@@ -312,7 +312,8 @@ window.ALBUMS = [
     "tracks": [
       {
         "title": "天外来物",
-        "duration": "4:17"
+        "duration": "4:17",
+        "src": "audio/天外来物-薛之谦.mp3"
       },
       {
         "title": "迟迟",
