@@ -1,8 +1,8 @@
 /**
  * 由 tools/apply-export.mjs / tools/attach-audio.mjs 生成，请勿手改。
- * 生成时间：2026-11-08T13:39:43.581Z
+ * 生成时间：2026-11-09T02:28:03.298Z
  */
-window.ALBUMS_VERSION = "2026-11-08T13:39:43.581Z";
+window.ALBUMS_VERSION = "2026-11-09T02:28:03.298Z";
 
 window.ALBUMS = [
   {
@@ -153,7 +153,8 @@ window.ALBUMS = [
       },
       {
         "title": "顽疾 (Live)",
-        "duration": "4:50"
+        "duration": "4:50",
+        "src": "audio/顽疾-Live-薛之谦.mp3"
       }
     ],
     "ring": "outer"
