@@ -1,8 +1,8 @@
 /**
  * 由 tools/apply-export.mjs / tools/attach-audio.mjs 生成，请勿手改。
- * 生成时间：2026-11-09T02:36:53.350Z
+ * 生成时间：2026-11-09T02:40:33.926Z
  */
-window.ALBUMS_VERSION = "2026-11-09T02:36:53.350Z";
+window.ALBUMS_VERSION = "2026-11-09T02:40:33.926Z";
 
 window.ALBUMS = [
   {
@@ -349,7 +349,8 @@ window.ALBUMS = [
       },
       {
         "title": "纸船",
-        "duration": "4:07"
+        "duration": "4:08",
+        "src": "audio/纸船-薛之谦郁可唯.mp3"
       }
     ],
     "ring": "outer"
