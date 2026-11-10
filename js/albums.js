@@ -8,7 +8,7 @@ window.ALBUMS = [
   {
     "id": "amw3ckzx8",
     "title": "意外",
-    "sub": "流行",
+    "sub": "Pop",
     "year": 2026,
     "accent": "#c084fc",
     "cover": "images/albums/up-1.jpg",
@@ -61,7 +61,7 @@ window.ALBUMS = [
   {
     "id": "amw3cr4iu",
     "title": "尘",
-    "sub": "流行",
+    "sub": "Pop",
     "year": 2026,
     "accent": "#38e1ff",
     "cover": "images/albums/up-2.jpg",
@@ -112,7 +112,7 @@ window.ALBUMS = [
   {
     "id": "amw3cvno1",
     "title": "湖泊",
-    "sub": "流行",
+    "sub": "Pop",
     "year": 2026,
     "accent": "#ffb454",
     "cover": "images/albums/up-3.jpg",
@@ -127,7 +127,7 @@ window.ALBUMS = [
   {
     "id": "amw3cxu00",
     "title": "媚人",
-    "sub": "流行",
+    "sub": "Pop",
     "year": 2026,
     "accent": "#a3e635",
     "cover": "images/albums/up-4.jpg",
@@ -142,7 +142,7 @@ window.ALBUMS = [
   {
     "id": "amw3cy60u",
     "title": "顽疾",
-    "sub": "流行",
+    "sub": "Pop",
     "year": 2026,
     "accent": "#9db4ff",
     "cover": "images/albums/up-5.jpg",
@@ -162,7 +162,7 @@ window.ALBUMS = [
   {
     "id": "amw3czw2w",
     "title": "霸王别姬",
-    "sub": "流行",
+    "sub": "Pop",
     "year": 2026,
     "accent": "#c084fc",
     "cover": "images/albums/up-6.jpg",
@@ -177,7 +177,7 @@ window.ALBUMS = [
   {
     "id": "amw3d0eom",
     "title": "金斧子银斧子",
-    "sub": "流行",
+    "sub": "Pop",
     "year": 2026,
     "accent": "#ff4fa3",
     "cover": "images/albums/up-7.jpg",
@@ -192,7 +192,7 @@ window.ALBUMS = [
   {
     "id": "amw3d5uc6",
     "title": "跃",
-    "sub": "流行",
+    "sub": "Pop",
     "year": 2026,
     "accent": "#38e1ff",
     "cover": "images/albums/up-8.jpg",
@@ -207,7 +207,7 @@ window.ALBUMS = [
   {
     "id": "amw3d6c6h",
     "title": "守村人",
-    "sub": "流行",
+    "sub": "Pop",
     "year": 2026,
     "accent": "#ffb454",
     "cover": "images/albums/up-9.jpg",
@@ -254,7 +254,7 @@ window.ALBUMS = [
   {
     "id": "amw3dau1p",
     "title": "无数",
-    "sub": "流行",
+    "sub": "Pop",
     "year": 2026,
     "accent": "#a3e635",
     "cover": "images/albums/up-10.jpg",
@@ -305,7 +305,7 @@ window.ALBUMS = [
   {
     "id": "amw3dbb3g",
     "title": "天外来物",
-    "sub": "流行",
+    "sub": "Pop",
     "year": 2026,
     "accent": "#9db4ff",
     "cover": "images/albums/up-11.jpg",
@@ -358,7 +358,7 @@ window.ALBUMS = [
   {
     "id": "amw3dhqow",
     "title": "怪咖",
-    "sub": "流行",
+    "sub": "Pop",
     "year": 2026,
     "accent": "#c084fc",
     "cover": "images/albums/up-12.jpg",
@@ -374,7 +374,7 @@ window.ALBUMS = [
   {
     "id": "amw3di3yn",
     "title": "渡",
-    "sub": "流行",
+    "sub": "Pop",
     "year": 2026,
     "accent": "#ff4fa3",
     "cover": "images/albums/up-13.jpg",
@@ -425,7 +425,7 @@ window.ALBUMS = [
   {
     "id": "amw3j7d9v",
     "title": "初学者",
-    "sub": "流行",
+    "sub": "Pop",
     "year": 2026,
     "accent": "#38e1ff",
     "cover": "images/albums/up-14.jpg",
@@ -464,7 +464,7 @@ window.ALBUMS = [
   {
     "id": "amw3j8256",
     "title": "一半",
-    "sub": "流行",
+    "sub": "Pop",
     "year": 2026,
     "accent": "#ffb454",
     "cover": "images/albums/up-15.jpg",

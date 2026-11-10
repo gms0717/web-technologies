@@ -56,7 +56,7 @@
   }
 
   function openAudioDB() {
-    if (!('indexedDB' in window)) return Promise.reject(new Error('浏览器不支持 IndexedDB'));
+    if (!('indexedDB' in window)) return Promise.reject(new Error('This browser does not support IndexedDB'));
     if (!audioDB) {
       audioDB = new Promise((resolve, reject) => {
         const request = indexedDB.open(AUDIO_DB, 1);
@@ -217,7 +217,7 @@
       localStorage.setItem(STORE_KEY, JSON.stringify(albums));
       return true;
     } catch (err) {
-      toast('保存失败：本地存储空间可能已满');
+      toast('Could not save: local storage is full');
       return false;
     }
   }
@@ -301,7 +301,7 @@
     card.dataset.index = String(index);
     card.tabIndex = 0;
     card.setAttribute('role', 'button');
-    card.setAttribute('aria-label', `${album.title}，${album.sub}，查看曲目`);
+    card.setAttribute('aria-label', `${album.title}, ${album.sub}, view tracks`);
     card.innerHTML = `
       <span class="album-inner">
         <img src="${album.cover}" alt="" draggable="false">
@@ -310,7 +310,7 @@
           <em>${escapeHtml(album.sub)}</em>
         </span>
       </span>
-      <button class="album-remove" type="button" aria-label="删除专辑 ${escapeHtml(album.title)}">✕</button>
+      <button class="album-remove" type="button" aria-label="Delete album ${escapeHtml(album.title)}">✕</button>
     `;
 
     // 悬停只暂停它所在的那一圈；背面的专辑不参与
@@ -421,8 +421,8 @@
           <h3>${escapeHtml(title)}</h3>
           <p class="mini-text">${escapeHtml(text)}</p>
           <div class="mini-actions">
-            <button type="button" class="mini-btn ghost" data-close>取消</button>
-            <button type="button" class="mini-btn danger" data-ok>删除</button>
+            <button type="button" class="mini-btn ghost" data-close>Cancel</button>
+            <button type="button" class="mini-btn danger" data-ok>Delete</button>
           </div>
         </div>
       `;
@@ -469,7 +469,7 @@
       };
       image.onerror = () => {
         URL.revokeObjectURL(url);
-        reject(new Error('图片读取失败'));
+        reject(new Error('Could not read the image'));
       };
       image.src = url;
     });
@@ -518,7 +518,7 @@
     link.click();
     link.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1500);
-    toast('已导出 JSON（本地音频不包含在内）');
+    toast('Exported JSON (local audio files are not included)');
   }
 
   /** 读入导出的 JSON，覆盖当前设置并刷新 */
@@ -533,7 +533,7 @@
 
       try {
         const data = JSON.parse(await file.text());
-        if (!Array.isArray(data.albums) || !data.albums.length) throw new Error('缺少 albums');
+        if (!Array.isArray(data.albums) || !data.albums.length) throw new Error('missing albums');
 
         localStorage.setItem(STORE_KEY, JSON.stringify(data.albums));
         // 避免数据文件版本号不一致，把刚导入的内容清掉
@@ -555,10 +555,10 @@
           localStorage.removeItem('album_bg_image');
         }
 
-        toast('已导入，正在刷新…');
+        toast('Imported — reloading…');
         setTimeout(() => location.reload(), 600);
       } catch (err) {
-        toast('导入失败：文件格式不对');
+        toast('Import failed: invalid file');
       }
     });
 
@@ -567,35 +567,35 @@
 
   /* ---------------- 新增 / 删除专辑 ---------------- */
   function openAlbumForm(ringKey = 'outer') {
-    const ringName = ringKey === 'inner' ? '内圈' : '外圈';
+    const ringName = ringKey === 'inner' ? 'Inner ring' : 'Outer ring';
 
     const modal = document.createElement('div');
     modal.className = 'mini-modal';
     modal.innerHTML = `
       <div class="mini-mask" data-close></div>
       <form class="mini-panel" novalidate>
-        <h3>新增专辑 · ${ringName}</h3>
+        <h3>New album · ${ringName}</h3>
         <label class="mini-field">
-          <span>专辑名</span>
-          <input id="albumTitle" maxlength="24" placeholder="例如：MIDNIGHT DRIVE">
+          <span>Album title</span>
+          <input id="albumTitle" maxlength="24" placeholder="e.g. MIDNIGHT DRIVE">
         </label>
         <label class="mini-field">
-          <span>风格</span>
-          <input id="albumSub" maxlength="12" placeholder="选填，例如：合成器浪潮">
+          <span>Genre</span>
+          <input id="albumSub" maxlength="12" placeholder="Optional, e.g. Synthwave">
         </label>
         <label class="mini-field">
-          <span>封面</span>
+          <span>Cover</span>
           <input id="albumCover" type="file" accept="image/*">
-          <span class="cover-hint">不选则使用渐变占位封面</span>
+          <span class="cover-hint">Leave empty to use a gradient placeholder</span>
         </label>
         <div class="mini-actions">
           <span class="mini-links">
-            <button type="button" class="mini-link" data-export>导出</button>
-            <button type="button" class="mini-link" data-import>导入</button>
-            <button type="button" class="mini-link" data-reset>恢复默认</button>
+            <button type="button" class="mini-link" data-export>Export</button>
+            <button type="button" class="mini-link" data-import>Import</button>
+            <button type="button" class="mini-link" data-reset>Reset</button>
           </span>
-          <button type="button" class="mini-btn ghost" data-close>取消</button>
-          <button type="submit" class="mini-btn primary">添加</button>
+          <button type="button" class="mini-btn ghost" data-close>Cancel</button>
+          <button type="submit" class="mini-btn primary">Add</button>
         </div>
       </form>
     `;
@@ -635,7 +635,7 @@
         return;
       }
 
-      const sub = modal.querySelector('#albumSub').value.trim() || '未分类';
+      const sub = modal.querySelector('#albumSub').value.trim() || 'Uncategorized';
       const file = modal.querySelector('#albumCover').files[0];
       const cover = file ? await fileToCover(file).catch(() => null) : null;
 
@@ -657,7 +657,7 @@
 
       modal.remove();
       renderRings();
-      toast(`已添加专辑《${title}》，点开封面可加歌`);
+      toast(`Added "${title}" — open it to add tracks`);
     });
   }
 
@@ -666,11 +666,11 @@
     if (!album) return;
 
     if (albums.length <= 1) {
-      toast('至少保留一张专辑');
+      toast('Keep at least one album');
       return;
     }
 
-    const ok = await confirmModal(`删除专辑《${album.title}》？`, '这张专辑和它下面的曲目都会被移除。');
+    const ok = await confirmModal(`Delete the album "${album.title}"?`, 'The album and all of its tracks will be removed.');
     if (!ok) return;
 
     const [removed] = albums.splice(index, 1);
@@ -687,7 +687,7 @@
 
     saveAlbums();
     renderRings();
-    toast('已删除专辑');
+    toast('Album deleted');
   }
 
   /* ---------------- 专辑详情 ---------------- */
@@ -721,7 +721,7 @@
   function updateViewSub(index) {
     const album = albums[index];
     if (!album) return;
-    viewSub.textContent = `${album.sub} · ${album.year} · 共 ${album.tracks.length} 首`;
+    viewSub.textContent = `${album.sub} · ${album.year} · ${album.tracks.length} tracks`;
   }
 
   /** 正方形详情从被点击的专辑位置展开过去 */
@@ -783,12 +783,12 @@
           <span class="track-eq" aria-hidden="true"><i></i><i></i><i></i></span>
           <span class="track-time">${escapeHtml(track.duration)}</span>
         </button>
-        <button type="button" class="track-remove" aria-label="删除歌曲 ${escapeHtml(track.title)}">✕</button>
+        <button type="button" class="track-remove" aria-label="Delete track ${escapeHtml(track.title)}">✕</button>
       </li>`).join('');
 
     trackList.innerHTML = `
-      ${rows || '<li class="track-empty">还没有曲目</li>'}
-      <li><button type="button" class="track-add">＋ 添加歌曲</button></li>
+      ${rows || '<li class="track-empty">No tracks yet</li>'}
+      <li><button type="button" class="track-add">+ Add track</button></li>
     `;
 
     trackList.querySelectorAll('.track').forEach((btn) => {
@@ -816,24 +816,24 @@
     modal.innerHTML = `
       <div class="mini-mask" data-close></div>
       <form class="mini-panel" novalidate>
-        <h3>${editing ? '重新选择文件' : '添加歌曲'}</h3>
-        <p class="mini-text">${editing ? '原来的文件已失效，重新选一首并覆盖它' : `添加到《${escapeHtml(album.title)}》`}</p>
+        <h3>${editing ? 'Choose the file again' : 'Add a track'}</h3>
+        <p class="mini-text">${editing ? 'The original file is gone — pick it again to replace it' : `Add to "${escapeHtml(album.title)}"`}</p>
         <label class="mini-field">
-          <span>音频文件</span>
+          <span>Audio file</span>
           <input id="trackFile" type="file" accept="audio/*,.mp3,.flac,.m4a,.wav,.ogg,.opus">
-          <span class="cover-hint" id="trackFileHint">从电脑里选一首（mp3 / flac / m4a / wav）；不选则用演示音频</span>
+          <span class="cover-hint" id="trackFileHint">Pick a file from your computer (mp3 / flac / m4a / wav); without one a demo tone is used</span>
         </label>
         <label class="mini-field">
-          <span>歌曲名</span>
-          <input id="trackTitle" maxlength="40" placeholder="选文件后自动填入" value="${editing ? escapeHtml(editing.title) : ''}">
+          <span>Track title</span>
+          <input id="trackTitle" maxlength="40" placeholder="Filled in from the file" value="${editing ? escapeHtml(editing.title) : ''}">
         </label>
         <label class="mini-field">
-          <span>时长</span>
-          <input id="trackDuration" maxlength="6" placeholder="自动读取，也可手填 3:45" value="${editing && editing.duration !== '--:--' ? escapeHtml(editing.duration) : ''}">
+          <span>Duration</span>
+          <input id="trackDuration" maxlength="6" placeholder="Read automatically, or type 3:45" value="${editing && editing.duration !== '--:--' ? escapeHtml(editing.duration) : ''}">
         </label>
         <div class="mini-actions">
-          <button type="button" class="mini-btn ghost" data-close>取消</button>
-          <button type="submit" class="mini-btn primary">${editing ? '替换' : '添加'}</button>
+          <button type="button" class="mini-btn ghost" data-close>Cancel</button>
+          <button type="submit" class="mini-btn primary">${editing ? 'Replace' : 'Add'}</button>
         </div>
       </form>
     `;
@@ -904,8 +904,8 @@
       updateViewSub(albumIndex);
       toast(
         file
-          ? (track.src.startsWith('idb:') ? '已添加并存入本地' : '已添加（刷新页面后需重新选择文件）')
-          : '已添加歌曲'
+          ? (track.src.startsWith('idb:') ? 'Added and saved in this browser' : 'Added (pick the file again after a reload)')
+          : 'Track added'
       );
     });
   }
@@ -958,7 +958,7 @@
     saveAlbums();
     renderTracks(albumIndex);
     updateViewSub(albumIndex);
-    toast('已删除歌曲');
+    toast('Track deleted');
   }
 
   /** 删歌/删专辑时顺手清掉存在浏览器里的文件 */
@@ -1007,7 +1007,7 @@
     // 本地文件要先取出来转成临时地址；取不到说明文件丢了，引导重新选择
     const source = await resolveTrackSource(track);
     if (!source) {
-      toast('这个本地文件需要重新选择（刷新页面或清理浏览器后失效）');
+      toast('This local file must be picked again (it is lost after a reload or clearing browser data)');
       openTrackForm(albumIndex, { replaceIndex: trackIndex });
       return;
     }
@@ -1043,11 +1043,11 @@
   function updatePlayButton() {
     const playing = !audio.paused && !audio.ended;
     playBtn.textContent = playing ? '❚❚' : '▶';
-    playBtn.setAttribute('aria-label', playing ? '暂停' : '播放');
+    playBtn.setAttribute('aria-label', playing ? 'Pause' : 'Play');
 
     if (activeIndex >= 0) {
       const sameAlbum = current.album === activeIndex;
-      playAlbumBtn.textContent = sameAlbum && playing ? '❚❚ 暂停' : '▶ 播放整张';
+      playAlbumBtn.textContent = sameAlbum && playing ? '❚❚ Pause' : '▶ Play album';
     }
 
     markTracks();
@@ -1063,7 +1063,7 @@
   playBtn.addEventListener('click', () => {
     const album = albums[activeIndex >= 0 ? activeIndex : 0];
     if (!album || !album.tracks.length) {
-      toast('这张专辑还没有歌曲');
+      toast('This album has no tracks yet');
       return;
     }
     if (!audio.src) {
@@ -1080,7 +1080,7 @@
     if (activeIndex < 0) return;
     const album = albums[activeIndex];
     if (!album.tracks.length) {
-      toast('这张专辑还没有歌曲');
+      toast('This album has no tracks yet');
       return;
     }
 
@@ -1124,11 +1124,11 @@
 
   /* ---------------- 背景切换 ---------------- */
   const BACKGROUNDS = [
-    { name: '午夜星空', css: 'radial-gradient(circle at 50% 35%, #1a1a2e 0%, #0b0b12 70%)' },
-    { name: '霓虹紫', css: 'radial-gradient(circle at 68% 18%, #3b0d5c 0%, #0b0413 65%)' },
-    { name: '深海', css: 'radial-gradient(circle at 30% 22%, #063a52 0%, #030a10 72%)' },
-    { name: '落日', css: 'radial-gradient(circle at 66% 20%, #5a2410 0%, #100604 70%)' },
-    { name: '极简黑', css: 'radial-gradient(circle at 50% 30%, #14161c 0%, #050608 75%)' },
+    { name: 'Midnight', css: 'radial-gradient(circle at 50% 35%, #1a1a2e 0%, #0b0b12 70%)' },
+    { name: 'Neon Purple', css: 'radial-gradient(circle at 68% 18%, #3b0d5c 0%, #0b0413 65%)' },
+    { name: 'Deep Sea', css: 'radial-gradient(circle at 30% 22%, #063a52 0%, #030a10 72%)' },
+    { name: 'Sunset', css: 'radial-gradient(circle at 66% 20%, #5a2410 0%, #100604 70%)' },
+    { name: 'Minimal Black', css: 'radial-gradient(circle at 50% 30%, #14161c 0%, #050608 75%)' },
   ];
 
   const layers = [document.getElementById('bgA'), document.getElementById('bgB')];
@@ -1142,7 +1142,7 @@
     dot.className = 'bg-dot';
     dot.style.background = bg.css;
     dot.title = bg.name;
-    dot.setAttribute('aria-label', `背景：${bg.name}`);
+    dot.setAttribute('aria-label', `Background: ${bg.name}`);
     dot.addEventListener('click', () => setPreset(index));
     bgSwitch.appendChild(dot);
     return dot;
@@ -1264,7 +1264,7 @@
       localStorage.setItem(BANNERS_KEY, JSON.stringify(banners));
       return true;
     } catch (err) {
-      toast('保存失败：本地存储空间可能已满');
+      toast('Could not save: local storage is full');
       return false;
     }
   }
@@ -1283,7 +1283,7 @@
       const item = (index) => `
         <figure class="marquee-item" data-index="${index}">
           <img src="${banners[index]}" alt="" draggable="false">
-          <button class="marquee-remove" type="button" aria-label="移除这张轮播图">✕</button>
+          <button class="marquee-remove" type="button" aria-label="Remove this banner">✕</button>
         </figure>`;
 
       // 按可视宽度算需要重复几份，避免循环时露出空白
@@ -1326,7 +1326,7 @@
       banners.splice(index, 1);
       saveBanners();
       renderMarquees();
-      toast('已移除轮播图');
+      toast('Banner removed');
     });
   });
 
@@ -1360,7 +1360,7 @@
       };
       image.onerror = () => {
         URL.revokeObjectURL(url);
-        reject(new Error('图片读取失败'));
+        reject(new Error('Could not read the image'));
       };
       image.src = url;
     });
@@ -1378,7 +1378,7 @@
     const dataUrl = await fileToBanner(file).catch(() => null);
     bannerFile.value = '';
     if (!dataUrl) {
-      toast('图片读取失败');
+      toast('Could not read the image');
       return;
     }
 
@@ -1388,7 +1388,7 @@
       return;
     }
     renderMarquees();
-    toast('已添加轮播图（16:9）');
+    toast('Banner added (16:9)');
   });
 
   /* ---------------- 启动 ---------------- */

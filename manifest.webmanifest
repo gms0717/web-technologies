@@ -1,14 +1,14 @@
-{
-  "name": "环绕专辑 · ALBUM RING",
-  "short_name": "环绕专辑",
-  "description": "纯前端 3D 专辑墙：双环反向旋转 + 斜向图片轮播 + 点开即播。",
+﻿{
+  "name": "Album Ring",
+  "short_name": "Album Ring",
+  "description": "A dependency-free 3D album wall: two counter-rotating rings, diagonal image marquees and click-to-play tracks.",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#05060a",
   "theme_color": "#05060a",
-  "lang": "zh-CN",
+  "lang": "en",
   "icons": [
     {
       "src": "images/icon-512.png",
