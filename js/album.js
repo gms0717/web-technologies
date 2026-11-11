@@ -1,4 +1,4 @@
-/* =========================================================
+﻿/* =========================================================
    album.js — 环绕专辑交互
    环形旋转 / 悬停暂停并翻开 / 增删专辑与曲目 / 播放器 / 背景切换
    ========================================================= */
@@ -373,20 +373,20 @@
     updateFacing();
   }
 
-  /** 读某一圈动画当前转到的角度；带方向（reverse 时是负方向），否则正反面会判反 */
+  /**
+   * 读这一圈「实际转到多少度」。
+   *
+   * 不再从动画时长/方向推算 —— 那样内外圈方向不同就容易算反。
+   * 这里直接解析渲染后的 3D 矩阵：环的 transform 是
+   * translateY · rotateX(-8deg) · rotateY(θ)，其第一列第三行
+   * m31 = -cos(8°)·sin(θ)，配合 m11 = cos(θ) 反解出 θ。
+   * 读到的是浏览器真正在用的角度，内外圈都适用。
+   */
   function ringRotation(ring) {
-    if (!ring.anim || ring.anim.playState === 'idle') {
-      ring.anim = ring.el.getAnimations()[0] || null;
-    }
-
-    const timing = ring.anim && ring.anim.effect ? ring.anim.effect.getTiming() : null;
-    const duration = timing && Number(timing.duration) > 0 ? Number(timing.duration) : 50000;
-    const time = ring.anim && ring.anim.currentTime ? Number(ring.anim.currentTime) : 0;
-    const progress = ((time % duration) / duration) * 360;
-
-    const direction = (timing && timing.direction) || 'normal';
-    const reversed = direction === 'reverse' || direction === 'alternate-reverse';
-    return reversed ? 360 - progress : progress;
+    const raw = getComputedStyle(ring.el).transform;
+    if (!raw || raw === 'none') return 0;
+    const matrix = new DOMMatrixReadOnly(raw);
+    return (Math.atan2(matrix.m31, matrix.m11) * 180) / Math.PI;
   }
 
   /** 判断每张是否转到背面：背面压暗、隐藏文字、不响应鼠标 */
@@ -1418,6 +1418,7 @@
   renderRings();
   renderMarquees();
 })();
+
 
 
 
