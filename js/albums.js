@@ -1,8 +1,8 @@
 /**
  * 由 tools/apply-export.mjs / tools/attach-audio.mjs 生成，请勿手改。
- * 生成时间：2026-11-09T02:40:33.926Z
+ * 生成时间：2026-11-11T02:48:57.686Z
  */
-window.ALBUMS_VERSION = "2026-11-09T02:40:33.926Z";
+window.ALBUMS_VERSION = "2026-11-11T02:48:57.686Z";
 
 window.ALBUMS = [
   {
@@ -104,7 +104,8 @@ window.ALBUMS = [
       },
       {
         "title": "聊表心意",
-        "duration": "5:17"
+        "duration": "5:17",
+        "src": "audio/聊表心意-薛之谦刘惜君.mp3"
       }
     ],
     "ring": "inner"
