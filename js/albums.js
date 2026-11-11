@@ -1,8 +1,8 @@
 /**
  * 由 tools/apply-export.mjs / tools/attach-audio.mjs 生成，请勿手改。
- * 生成时间：2026-11-11T02:48:57.686Z
+ * 生成时间：2026-11-11T02:54:27.888Z
  */
-window.ALBUMS_VERSION = "2026-11-11T02:48:57.686Z";
+window.ALBUMS_VERSION = "2026-11-11T02:54:27.888Z";
 
 window.ALBUMS = [
   {
@@ -247,7 +247,8 @@ window.ALBUMS = [
       },
       {
         "title": "念",
-        "duration": "5:08"
+        "duration": "5:08",
+        "src": "audio/念-薛之谦.mp3"
       }
     ],
     "ring": "outer"
