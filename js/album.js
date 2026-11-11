@@ -373,7 +373,7 @@
     updateFacing();
   }
 
-  /** 读某一圈动画当前转到的角度（暂停时冻结，方向不影响正反面判断） */
+  /** 读某一圈动画当前转到的角度；带方向（reverse 时是负方向），否则正反面会判反 */
   function ringRotation(ring) {
     if (!ring.anim || ring.anim.playState === 'idle') {
       ring.anim = ring.el.getAnimations()[0] || null;
@@ -382,7 +382,11 @@
     const timing = ring.anim && ring.anim.effect ? ring.anim.effect.getTiming() : null;
     const duration = timing && Number(timing.duration) > 0 ? Number(timing.duration) : 50000;
     const time = ring.anim && ring.anim.currentTime ? Number(ring.anim.currentTime) : 0;
-    return (((time % duration) / duration) * 360) % 360;
+    const progress = ((time % duration) / duration) * 360;
+
+    const direction = (timing && timing.direction) || 'normal';
+    const reversed = direction === 'reverse' || direction === 'alternate-reverse';
+    return reversed ? 360 - progress : progress;
   }
 
   /** 判断每张是否转到背面：背面压暗、隐藏文字、不响应鼠标 */
